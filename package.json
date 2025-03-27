@@ -1,0 +1,31 @@
+{
+  "name": "gemini-agent-lib",
+  "version": "1.0.0",
+  "description": "Uma biblioteca NodeJS para criar agentes de IA com Gemini LLM",
+  "main": "index.js",
+  "author": "Oliver Lessa",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "agents",
+    "llm",
+    "gemini",
+    "vertex-ai",
+    "nodejs",
+    "function-calling"
+  ],
+  "dependencies": {
+    "@google-cloud/discoveryengine": "^2.0.0",
+    "@google-cloud/vertexai": "^1.9.3",
+    "@google/generative-ai": "^0.23.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "gts": "^6.0.2"
+  },
+  "scripts": {
+    "test": "node test/test-chat-agent.js",
+    "test:all": "for file in test/*.js; do node \"$file\"; done"
+  },
+  "type": "commonjs"
+}
