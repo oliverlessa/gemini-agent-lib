@@ -8,6 +8,47 @@ Uma biblioteca Node.js para criar e orquestrar agentes de IA usando os modelos G
 npm install gemini-agent-lib
 ```
 
+## Configuração Essencial (.env)
+
+Esta biblioteca requer um arquivo `.env` na raiz do projeto para funcionar corretamente. Este arquivo contém as chaves de API e configurações necessárias para acessar os serviços do Google AI e Vertex AI.
+
+### Configuração Rápida
+
+1. Instale o pacote dotenv:
+   ```bash
+   npm install dotenv
+   ```
+
+2. Crie um arquivo `.env` na raiz do seu projeto
+3. Adicione suas variáveis de ambiente (no mínimo a chave do Gemini):
+   ```
+   GEMINI_API_KEY=sua_chave_api_gemini
+   ```
+4. Carregue o dotenv no início do seu aplicativo:
+   ```javascript
+   require('dotenv').config();
+   ```
+5. Adicione o arquivo `.env` ao seu `.gitignore`
+
+### Exemplo Completo do .env
+
+```
+# Chave de API do Gemini
+GEMINI_API_KEY=sua_chave_api_gemini
+
+# Configurações do Google Cloud e Vertex AI
+VERTEX_API_KEY=sua_chave_api_vertex
+GOOGLE_CLOUD_PROJECT_ID=seu_id_projeto_gcp
+VERTEX_PROJECT_ID=seu_id_projeto_vertex
+VERTEX_LOCATION=regiao_vertex
+VERTEX_CREDENTIALS_PATH=./caminho_para_arquivo_credenciais.json
+GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
+```
+
+**⚠️ IMPORTANTE**: O arquivo `.env` é essencial para o funcionamento da biblioteca. Sem ele, você não conseguirá se conectar aos modelos de IA.
+
+Para uma explicação detalhada de cada variável e como obtê-las, consulte a [documentação de configuração](./docs/configuracao.md).
+
 ## Uso Básico
 
 ```javascript
