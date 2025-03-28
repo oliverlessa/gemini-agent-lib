@@ -40,6 +40,10 @@ O `ChatAgent` utiliza a classe `VertexAILLM` configurada no modo "chat" para man
 
 ### Inicialização Básica
 
+O `ChatAgent` pode ser inicializado de duas maneiras: fornecendo uma instância de LLM personalizada ou deixando que o agente crie automaticamente uma instância padrão do `VertexAILLM`.
+
+#### Inicialização com LLM personalizado
+
 ```javascript
 // Inicializa o LLM no modo chat
 const llm = new VertexAILLM({
@@ -53,7 +57,7 @@ const llm = new VertexAILLM({
     }
 });
 
-// Cria uma instância do ChatAgent
+// Cria uma instância do ChatAgent com o LLM personalizado
 const chatAgent = new ChatAgent({
     role: "Assistente Pessoal",
     objective: "Ajudar o usuário com suas perguntas e tarefas",
@@ -61,6 +65,35 @@ const chatAgent = new ChatAgent({
     llm: llm
 });
 ```
+
+#### Inicialização com LLM padrão (automático)
+
+```javascript
+// Cria uma instância do ChatAgent sem fornecer um LLM
+// Um VertexAILLM padrão será instanciado automaticamente
+const chatAgent = new ChatAgent({
+    role: "Assistente Pessoal",
+    objective: "Ajudar o usuário com suas perguntas e tarefas",
+    context: "Você é um assistente pessoal útil e amigável chamado GeminiBot."
+});
+```
+
+Quando não é fornecido um LLM, o `ChatAgent` cria automaticamente uma instância do `VertexAILLM` com a seguinte configuração padrão:
+
+```javascript
+const llm = new VertexAILLM({
+    projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+    credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    modelName: "gemini-2.0-flash-001",
+    mode: "chat",
+    generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.2
+    }
+});
+```
+
+> **Nota**: Para que a inicialização automática funcione, as variáveis de ambiente `GOOGLE_CLOUD_PROJECT_ID` e `GOOGLE_APPLICATION_CREDENTIALS` devem estar configuradas no ambiente.
 
 ### Processamento de Mensagens
 
@@ -161,6 +194,7 @@ const resposta = await chatAgent.processUserMessage("Olá novamente!");
 1. **Modo Chat do LLM**:
    - O `ChatAgent` requer que o LLM esteja configurado no modo "chat"
    - Um aviso é exibido se o LLM não estiver no modo correto
+   - Quando o LLM é instanciado automaticamente, ele já é configurado no modo "chat"
 
 2. **Gerenciamento de Memória**:
    - O histórico de conversa cresce a cada interação
