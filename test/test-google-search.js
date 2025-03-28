@@ -15,6 +15,18 @@ async function testGoogleSearch() {
             modelName: "gemini-2.0-flash", // ou outro modelo que suporte Google Search
             mode: "oneshot"
         });
+
+        const vertexLLM = new VertexAILLM({
+            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            projectId: process.env.VERTEX_PROJECT_ID,
+            location: process.env.VERTEX_LOCATION || "us-central1",
+            modelName: "gemini-2.0-flash",
+            mode: "oneshot",
+            generationConfig: {
+                maxOutputTokens: 8192,
+                temperature: 0.2
+            }
+        });
         
         // Criar o agente com Google Search habilitado
         const agenteGoogleSearch = new Agent({
@@ -24,9 +36,9 @@ async function testGoogleSearch() {
                      Quando o usuário fizer perguntas que exijam informações atualizadas ou específicas,
                      use o Google Search para obter dados relevantes.
                      Após receber os resultados da pesquisa, forneça uma resposta clara e informativa
-                     baseada nesses dados, citando as fontes quando apropriado.`,
+                     baseada nesses dados. Cite e liste todas as fontes de informações encontradas. Se as fontes forem sites, liste os links completos.`,
             task: "", // Será definida abaixo
-            llm: genAILLM,
+            llm: vertexLLM,
             enableGoogleSearch: true // Habilitando o Google Search
         });
         
