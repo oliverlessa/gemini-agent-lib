@@ -115,17 +115,17 @@ async function testGoogleSearch() {
         ];
         
         // Executar cada tarefa combinada
-        for (const tarefa of tarefasCombinadas) {
-            console.log(`\n\n--- Executando tarefa combinada: "${tarefa}" ---`);
-            agenteCombinado.task = tarefa;
+        // for (const tarefa of tarefasCombinadas) {
+        //     console.log(`\n\n--- Executando tarefa combinada: "${tarefa}" ---`);
+        //     agenteCombinado.task = tarefa;
             
-            try {
-                const resposta = await agenteCombinado.executeTask();
-                console.log(`\nResposta do Agente Combinado:\n${resposta}`);
-            } catch (error) {
-                console.error(`Erro ao executar tarefa "${tarefa}":`, error);
-            }
-        }
+        //     try {
+        //         const resposta = await agenteCombinado.executeTask();
+        //         console.log(`\nResposta do Agente Combinado:\n${resposta}`);
+        //     } catch (error) {
+        //         console.error(`Erro ao executar tarefa "${tarefa}":`, error);
+        //     }
+        // }
         
     } catch (error) {
         console.error("Erro ao executar o teste:", error);
@@ -157,7 +157,7 @@ async function testGoogleSearchVertexAI() {
                      Quando o usuário fizer perguntas que exijam informações atualizadas ou específicas,
                      use o Google Search para obter dados relevantes.
                      Após receber os resultados da pesquisa, forneça uma resposta clara e informativa
-                     baseada nesses dados, citando as fontes quando apropriado.`,
+                     baseada nesses dados. Cite e liste todas as fontes de informações encontradas. Se as fontes forem sites, liste os links completos.`,
             task: "", // Será definida abaixo
             llm: vertexLLM,
             enableGoogleSearch: true // Habilitando o Google Search
@@ -166,7 +166,7 @@ async function testGoogleSearchVertexAI() {
         // Definir tarefas que incentivem o uso do Google Search
         const tarefasVertex = [
             "Quais são as últimas notícias sobre tecnologia?",
-            "Qual é a capital da Austrália e quantos habitantes tem?"
+            // "Qual é a capital da Austrália e quantos habitantes tem?"
         ];
         
         // Executar cada tarefa sequencialmente
@@ -232,17 +232,17 @@ async function testGoogleSearchVertexAI() {
         ];
         
         // Executar cada tarefa combinada
-        for (const tarefa of tarefasCombinadasVertex) {
-            console.log(`\n\n--- Executando tarefa combinada com Vertex AI: "${tarefa}" ---`);
-            agenteCombinadoVertex.task = tarefa;
+        // for (const tarefa of tarefasCombinadasVertex) {
+        //     console.log(`\n\n--- Executando tarefa combinada com Vertex AI: "${tarefa}" ---`);
+        //     agenteCombinadoVertex.task = tarefa;
             
-            try {
-                const resposta = await agenteCombinadoVertex.executeTask();
-                console.log(`\nResposta do Agente Combinado Vertex:\n${resposta}`);
-            } catch (error) {
-                console.error(`Erro ao executar tarefa "${tarefa}" com Vertex AI:`, error);
-            }
-        }
+        //     try {
+        //         const resposta = await agenteCombinadoVertex.executeTask();
+        //         console.log(`\nResposta do Agente Combinado Vertex:\n${resposta}`);
+        //     } catch (error) {
+        //         console.error(`Erro ao executar tarefa "${tarefa}" com Vertex AI:`, error);
+        //     }
+        // }
         
     } catch (error) {
         console.error("Erro ao executar o teste com Vertex AI:", error);
