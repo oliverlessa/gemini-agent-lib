@@ -98,6 +98,7 @@ Para documentação detalhada sobre cada componente, consulte a pasta [docs](./d
 
 - [Chat Agent](./docs/chat-agent.md)
 - [Thinking Agent](./docs/thinking-agent.md)
+- [Sequential Agent Chain](./docs/sequential-agent-chain.md)
 - [Hierarchical Agent Orchestrator](./docs/hierarchical-agent-orchestrator.md)
 - [Auto Gen Orchestrator](./docs/auto-gen-orchestrator.md)
 - [Vertex AI Search Retriever](./docs/vertex-ai-search-retriever.md)
