@@ -89,6 +89,7 @@ console.log(resposta);
 - **ThinkingAgent**: Agente com capacidade de "pensar" antes de responder
 - **SequentialAgentChain**: Executa uma cadeia de agentes em sequência
 - **HierarchicalAgentOrchestrator**: Orquestra múltiplos agentes de forma hierárquica
+- **AutoGenOrchestrator**: Orquestra autonomamente múltiplos agentes para resolver tarefas complexas (requer Vertex AI)
 - **ToolBuilder**: Facilita a criação de ferramentas para os agentes
 
 ## Documentação
