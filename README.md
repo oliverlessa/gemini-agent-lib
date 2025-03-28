@@ -100,15 +100,6 @@ Para documentação detalhada sobre cada componente, consulte a pasta [docs](./d
 
 Veja exemplos de uso na pasta [examples](./examples).
 
-## Testes
-
-Para executar os testes:
-
-```bash
-npm test          # Executa o teste principal
-npm run test:all  # Executa todos os testes
-```
-
 ## Licença
 
 MIT
