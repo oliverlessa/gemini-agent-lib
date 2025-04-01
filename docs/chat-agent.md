@@ -244,6 +244,144 @@ Para executar o exemplo simplificado:
 node test-chat-agent-simple.js
 ```
 
+## Delegação para Agentes Especialistas
+
+O `ChatAgent` agora suporta a delegação de tarefas para agentes especialistas, permitindo que o agente principal encaminhe solicitações específicas para agentes especializados em determinados domínios.
+
+### Visão Geral da Delegação
+
+A funcionalidade de delegação permite que o `ChatAgent` atue como um "roteador" que:
+
+1. Mantém a conversa principal com o usuário
+2. Identifica quando uma solicitação requer conhecimento ou ação especializada
+3. Delega a tarefa para um agente especialista apropriado
+4. Recebe a resposta do especialista e a integra na conversa
+
+Esta abordagem permite criar um sistema de conversação mais robusto e escalável, onde cada agente especialista pode se concentrar em um domínio específico.
+
+### Componentes da Delegação
+
+A implementação da delegação envolve dois componentes principais:
+
+1. **AgentRegistry**: Uma classe que gerencia a criação e configuração de agentes especialistas
+2. **Ferramenta de Delegação**: Uma ferramenta especial (`delegate_task_to_specialist`) que o LLM pode invocar para delegar tarefas
+
+### Inicialização com Delegação
+
+```javascript
+// Configuração dos agentes especialistas
+const specialistAgentsConfig = {
+    "Tradutor EN-PT": {
+        objective: "Traduzir textos do inglês para o português brasileiro.",
+        context: "Você é um tradutor especializado. Traduza o texto fornecido do inglês para o português brasileiro de forma precisa e natural.",
+        llmMode: 'oneshot'
+    },
+    "Pesquisador Financeiro": {
+        objective: "Fornecer análises e informações sobre mercados financeiros.",
+        context: "Você é um pesquisador financeiro especializado. Forneça análises claras e objetivas.",
+        enableGoogleSearch: true,
+        llmMode: 'oneshot'
+    }
+};
+
+// Cria uma instância do ChatAgent com delegação habilitada
+const chatAgent = new ChatAgent({
+    role: "Assistente Virtual",
+    objective: "Ajudar o usuário com suas dúvidas e tarefas",
+    context: "Você é um assistente virtual inteligente que pode delegar tarefas para especialistas.",
+    llm: llm,
+    tools: [minhaFerramenta1, minhaFerramenta2],
+    enableSpecialistDelegation: true, // Habilita a delegação
+    specialistAgentsConfig: specialistAgentsConfig // Configuração dos especialistas
+});
+```
+
+### Gerenciamento de Especialistas
+
+O `ChatAgent` fornece métodos para gerenciar os agentes especialistas:
+
+```javascript
+// Registrar um novo especialista
+chatAgent.registerSpecialist("Analista de Dados", {
+    objective: "Analisar dados e gerar insights estatísticos.",
+    context: "Você é um analista de dados especializado em estatística e visualização de dados.",
+    llmMode: 'oneshot'
+});
+
+// Remover um especialista
+chatAgent.unregisterSpecialist("Analista de Dados");
+
+// Obter a lista de especialistas disponíveis
+const availableRoles = chatAgent.getAvailableSpecialistRoles();
+console.log(`Especialistas disponíveis: ${availableRoles.join(', ')}`);
+
+// Habilitar/desabilitar a delegação dinamicamente
+chatAgent.disableSpecialistDelegation();
+chatAgent.enableSpecialistDelegation(novaConfiguracao);
+```
+
+### Fluxo de Delegação
+
+Quando o `ChatAgent` recebe uma mensagem do usuário:
+
+1. O LLM analisa a mensagem e decide se deve responder diretamente ou delegar
+2. Se decidir delegar, invoca a ferramenta `delegate_task_to_specialist` com:
+   - `specialist_role`: O papel do especialista a ser consultado
+   - `task_for_specialist`: A descrição da tarefa para o especialista
+3. O `ChatAgent` obtém o agente especialista do `AgentRegistry`
+4. O agente especialista executa a tarefa e retorna uma resposta
+5. O `ChatAgent` integra a resposta do especialista na conversa
+6. O LLM gera uma resposta final para o usuário
+
+### Uso Avançado: AgentRegistry Compartilhado
+
+Para cenários mais complexos, é possível compartilhar um `AgentRegistry` entre múltiplos `ChatAgent`:
+
+```javascript
+// Criar um registry compartilhado
+const sharedRegistry = new AgentRegistry(specialistAgentsConfig);
+
+// Criar múltiplos ChatAgents que compartilham o mesmo registry
+const chatAgent1 = new ChatAgent({
+    role: "Assistente 1",
+    llm: llm1,
+    enableSpecialistDelegation: true,
+    agentRegistry: sharedRegistry
+});
+
+const chatAgent2 = new ChatAgent({
+    role: "Assistente 2",
+    llm: llm2,
+    enableSpecialistDelegation: true,
+    agentRegistry: sharedRegistry
+});
+
+// Adicionar um novo especialista (afeta ambos os agentes)
+sharedRegistry.registerSpecialist("Novo Especialista", { /* configuração */ });
+```
+
+### Exemplo Completo
+
+A biblioteca inclui um exemplo completo de uso do `ChatAgent` com delegação:
+
+```bash
+node examples/exemplo-chat-agent-com-delegacao.js
+```
+
+Este exemplo demonstra:
+1. Configuração de agentes especialistas
+2. Inicialização do ChatAgent com delegação
+3. Registro e gerenciamento de especialistas
+4. Processamento de mensagens com delegação
+5. Diferentes formas de configurar a delegação
+
+### Considerações sobre Delegação
+
+1. **Desempenho**: Cada agente especialista usa sua própria instância de LLM, o que pode aumentar o uso de recursos
+2. **Contexto**: Os agentes especialistas não têm acesso ao histórico completo da conversa, apenas à tarefa delegada
+3. **Configuração do LLM**: Cada especialista pode usar um modelo e configurações diferentes, otimizados para sua tarefa
+4. **Ferramentas Específicas**: Cada especialista pode ter suas próprias ferramentas específicas
+
 ## Extensões Possíveis
 
 1. **Persistência de Histórico**:
@@ -265,3 +403,8 @@ node test-chat-agent-simple.js
 5. **Integração com Interfaces**:
    - Conectar o agente a interfaces de chat (web, mobile, etc.)
    - Implementar webhooks para plataformas de mensageria
+
+6. **Aprimoramento da Delegação**:
+   - Implementar mecanismos de feedback para melhorar as decisões de delegação
+   - Adicionar capacidade de delegação em cascata (especialistas delegando para sub-especialistas)
+   - Desenvolver especialistas que mantêm seu próprio histórico interno
