@@ -12,6 +12,17 @@ const ToolBuilder = require('./lib/tool-builder');
 const ThinkingAgent = require('./lib/thinking-agent');
 const AutoGenOrchestrator = require('./lib/auto-gen-orchestrator');
 
+// Componentes de memória
+const ConversationMemory = require('./lib/memory/conversation-memory');
+const SQLiteConversationMemoryAdapter = require('./lib/memory/sqlite-conversation-memory-adapter');
+const MongoDBConversationMemoryAdapter = require('./lib/memory/mongodb-conversation-memory-adapter');
+const FactMemory = require('./lib/memory/fact-memory');
+const SQLiteFactMemoryAdapter = require('./lib/memory/sqlite-fact-memory-adapter');
+const MongoDBFactMemoryAdapter = require('./lib/memory/mongodb-fact-memory-adapter');
+const SummaryMemory = require('./lib/memory/summary-memory');
+const SQLiteSummaryMemoryAdapter = require('./lib/memory/sqlite-summary-memory-adapter');
+const MongoDBSummaryMemoryAdapter = require('./lib/memory/mongodb-summary-memory-adapter');
+
 // Exportar ferramentas específicas
 const VertexAISearchRetrieverTool = require('./lib/tools/vertex-ai-search-retriever-tool');
 const WeatherTool = require('./lib/tools/weather-tool');
@@ -31,6 +42,24 @@ module.exports = {
     ToolBuilder,
     ThinkingAgent,
     AutoGenOrchestrator,
+    
+    // Componentes de memória
+    memory: {
+        // Interfaces
+        ConversationMemory,
+        FactMemory,
+        SummaryMemory,
+        
+        // Adaptadores SQLite
+        SQLiteConversationMemoryAdapter,
+        SQLiteFactMemoryAdapter,
+        SQLiteSummaryMemoryAdapter,
+        
+        // Adaptadores MongoDB
+        MongoDBConversationMemoryAdapter,
+        MongoDBFactMemoryAdapter,
+        MongoDBSummaryMemoryAdapter
+    },
     
     // Ferramentas
     tools: {
