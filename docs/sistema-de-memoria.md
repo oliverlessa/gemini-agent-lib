@@ -94,6 +94,87 @@ const conversationMemory = new memory.MongoDBConversationMemoryAdapter({
 });
 ```
 
+## Gerenciamento Automático de Memórias
+
+O `ChatAgent` agora suporta o gerenciamento automático de memórias de fatos e resumos. Esta funcionalidade permite que o agente analise automaticamente as conversas e:
+
+1. Extraia fatos relevantes e os armazene na `FactMemory`
+2. Gere ou atualize resumos na `SummaryMemory` quando apropriado
+
+### Como Funciona
+
+O gerenciamento automático é implementado através de um mecanismo de avaliação e decisão que:
+
+1. É acionado após cada interação completa (mensagem do usuário + resposta do agente)
+2. Utiliza o LLM configurado no `ChatAgent` para analisar a conversa
+3. Extrai fatos e/ou gera resumos conforme necessário
+4. Armazena as informações nas respectivas memórias
+
+### Configuração
+
+Para habilitar o gerenciamento automático, adicione os parâmetros `autoManageFactMemory` e/ou `autoManageSummaryMemory` ao construtor do `ChatAgent`:
+
+```javascript
+const chatAgent = new ChatAgent({
+    // Configurações básicas...
+    factMemory: factMemory,
+    summaryMemory: summaryMemory,
+    autoManageFactMemory: true,  // Habilita o gerenciamento automático de fatos
+    autoManageSummaryMemory: true  // Habilita o gerenciamento automático de resumos
+});
+```
+
+Você pode habilitar o gerenciamento automático para apenas um tipo de memória, se desejar:
+
+```javascript
+const chatAgent = new ChatAgent({
+    // Configurações básicas...
+    factMemory: factMemory,
+    summaryMemory: summaryMemory,
+    autoManageFactMemory: true,  // Apenas fatos serão gerenciados automaticamente
+    autoManageSummaryMemory: false
+});
+```
+
+### Processo de Extração de Fatos
+
+Quando `autoManageFactMemory` está habilitado:
+
+1. Após cada interação, o sistema analisa a mensagem do usuário e a resposta do agente
+2. O LLM identifica fatos relevantes na conversa
+3. Cada fato é representado como um par chave-valor
+4. Os fatos são automaticamente armazenados na `FactMemory`
+
+Exemplo de fatos que podem ser extraídos:
+- `nome_usuario`: "Maria Silva"
+- `cidade_residencia`: "São Paulo"
+- `preferencia_clima`: "quente"
+- `hobby_principal`: "fotografia"
+
+### Processo de Geração de Resumos
+
+Quando `autoManageSummaryMemory` está habilitado:
+
+1. Após cada interação, o sistema avalia se a conversa justifica uma atualização do resumo
+2. Se necessário, o LLM gera um novo resumo ou atualiza o existente
+3. O resumo é automaticamente armazenado na `SummaryMemory`
+
+### Coexistência com Gerenciamento Manual
+
+O gerenciamento automático não impede o gerenciamento manual. Mesmo com `autoManageFactMemory` e `autoManageSummaryMemory` habilitados, você ainda pode:
+
+- Adicionar fatos manualmente com `setFact()`
+- Adicionar resumos manualmente com `addSummary()`
+- Recuperar fatos e resumos com os métodos correspondentes
+
+Isso proporciona flexibilidade para combinar a extração automática com a adição manual de informações específicas.
+
+### Considerações sobre o Gerenciamento Automático
+
+1. **Custo de Processamento**: O gerenciamento automático requer chamadas adicionais ao LLM, o que pode aumentar o custo e a latência.
+2. **Qualidade da Extração**: A qualidade dos fatos e resumos extraídos depende do LLM utilizado e do contexto fornecido.
+3. **Controle**: Você pode desabilitar o gerenciamento automático a qualquer momento se preferir controle total sobre o que é armazenado.
+
 ## Uso com ChatAgent
 
 ### Configuração Básica
@@ -213,6 +294,7 @@ Veja exemplos completos de uso do sistema de memória nos arquivos:
 - `examples/exemplo-chat-agent-com-mongodb.js`: Uso com MongoDB e todos os tipos de memória.
 - `examples/exemplo-chat-agent-com-memoria-parcial.js`: Uso com apenas um tipo de memória.
 - `examples/exemplo-chat-agent-sem-memoria.js`: Uso sem memória persistente.
+- `examples/exemplo-chat-agent-com-memoria-automatica.js`: Uso com gerenciamento automático de memórias de fatos e resumos.
 
 ## Testes
 

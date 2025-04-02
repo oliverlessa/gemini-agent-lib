@@ -382,15 +382,158 @@ Este exemplo demonstra:
 3. **Configuração do LLM**: Cada especialista pode usar um modelo e configurações diferentes, otimizados para sua tarefa
 4. **Ferramentas Específicas**: Cada especialista pode ter suas próprias ferramentas específicas
 
+## Sistema de Memória
+
+O `ChatAgent` agora suporta um sistema de memória avançado que permite não apenas armazenar o histórico de conversas, mas também fatos discretos e resumos de conversas. Este sistema é composto por três tipos de memória:
+
+1. **ConversationMemory**: Armazena o histórico completo da conversa (já implementado anteriormente)
+2. **FactMemory**: Armazena fatos discretos (pares chave-valor) extraídos da conversa
+3. **SummaryMemory**: Armazena resumos da conversa que capturam os pontos principais
+
+### Inicialização com Sistema de Memória
+
+```javascript
+// Importa as classes de memória
+const { 
+  ConversationMemory, 
+  FactMemory, 
+  SummaryMemory,
+  SQLiteConversationMemoryAdapter,
+  SQLiteFactMemoryAdapter,
+  SQLiteSummaryMemoryAdapter
+} = require('gemini-chain-lib');
+
+// Cria instâncias de memória com adaptadores SQLite
+const conversationMemory = new ConversationMemory({
+  adapter: new SQLiteConversationMemoryAdapter({ dbPath: './conversation.db' })
+});
+
+const factMemory = new FactMemory({
+  adapter: new SQLiteFactMemoryAdapter({ dbPath: './facts.db' })
+});
+
+const summaryMemory = new SummaryMemory({
+  adapter: new SQLiteSummaryMemoryAdapter({ dbPath: './summaries.db' })
+});
+
+// Cria uma instância do ChatAgent com o sistema de memória completo
+const chatAgent = new ChatAgent({
+  role: "Assistente Pessoal",
+  objective: "Ajudar o usuário com suas perguntas e tarefas",
+  context: "Você é um assistente pessoal útil e amigável.",
+  llm: llm,
+  conversationMemory: conversationMemory,
+  factMemory: factMemory,
+  summaryMemory: summaryMemory,
+  autoManageFactMemory: true,  // Habilita o gerenciamento automático de fatos
+  autoManageSummaryMemory: true  // Habilita o gerenciamento automático de resumos
+});
+```
+
+### Gerenciamento Manual de Memória
+
+O sistema de memória pode ser gerenciado manualmente através dos métodos:
+
+```javascript
+// Gerenciamento de fatos
+await chatAgent.setFact('nome_usuario', 'João Silva');
+const nome = await chatAgent.getFact('nome_usuario');
+const todosFatos = await chatAgent.getAllFacts();
+
+// Gerenciamento de resumos
+await chatAgent.addSummary('O usuário perguntou sobre o clima e discutimos suas preferências de viagem.');
+const ultimoResumo = await chatAgent.getLatestSummary();
+const todosResumos = await chatAgent.getAllSummaries(5); // Limita a 5 resumos
+```
+
+### Gerenciamento Automático de Memória
+
+O `ChatAgent` agora suporta o gerenciamento automático de memórias de fatos e resumos. Quando habilitado, o agente:
+
+1. Analisa automaticamente cada interação da conversa após a resposta ser gerada
+2. Extrai fatos relevantes e os armazena na `FactMemory`
+3. Gera ou atualiza resumos na `SummaryMemory` quando apropriado
+
+Para habilitar o gerenciamento automático:
+
+```javascript
+const chatAgent = new ChatAgent({
+  // Outras configurações...
+  factMemory: factMemory,
+  summaryMemory: summaryMemory,
+  autoManageFactMemory: true,  // Habilita o gerenciamento automático de fatos
+  autoManageSummaryMemory: true  // Habilita o gerenciamento automático de resumos
+});
+```
+
+#### Como Funciona o Gerenciamento Automático
+
+1. Após cada interação (mensagem do usuário + resposta do agente), o sistema:
+   - Faz uma chamada adicional ao LLM com um prompt especializado
+   - Solicita a extração de fatos relevantes e/ou a geração de resumos
+   - Processa a resposta e atualiza as memórias correspondentes
+
+2. Para extração de fatos:
+   - O LLM identifica informações discretas importantes
+   - Cada fato é representado como um par chave-valor
+   - Os fatos são armazenados na `FactMemory` para uso futuro
+
+3. Para geração de resumos:
+   - O LLM avalia se a interação atual justifica uma atualização do resumo
+   - Se necessário, gera um novo resumo ou atualiza o existente
+   - O resumo é armazenado na `SummaryMemory`
+
+#### Coexistência de Gerenciamento Manual e Automático
+
+O gerenciamento automático não impede o gerenciamento manual. Mesmo com `autoManageFactMemory` e `autoManageSummaryMemory` habilitados, você ainda pode:
+
+- Adicionar fatos manualmente com `setFact()`
+- Adicionar resumos manualmente com `addSummary()`
+- Recuperar fatos e resumos com os métodos correspondentes
+
+Isso proporciona flexibilidade para combinar a extração automática com a adição manual de informações específicas.
+
+### Exemplo de Uso do Sistema de Memória
+
+```javascript
+// Inicializa o ChatAgent com sistema de memória completo
+const chatAgent = new ChatAgent({
+  // Configurações básicas...
+  conversationMemory: conversationMemory,
+  factMemory: factMemory,
+  summaryMemory: summaryMemory,
+  autoManageFactMemory: true,
+  autoManageSummaryMemory: true
+});
+
+// Processa uma mensagem do usuário
+await chatAgent.processUserMessage("Olá! Meu nome é Maria e moro em São Paulo.");
+// O sistema automaticamente extrai e armazena fatos como:
+// - nome_usuario: "Maria"
+// - cidade_usuario: "São Paulo"
+
+// Processa outra mensagem
+await chatAgent.processUserMessage("Estou planejando uma viagem para o Rio de Janeiro no próximo mês.");
+// O sistema extrai mais fatos e possivelmente gera um resumo
+
+// Recupera fatos armazenados para uso na aplicação
+const nome = await chatAgent.getFact('nome_usuario');
+console.log(`Nome do usuário: ${nome}`);
+
+// Recupera o resumo mais recente
+const resumo = await chatAgent.getLatestSummary();
+console.log(`Resumo da conversa: ${resumo}`);
+
+// Adiciona um fato manualmente (coexiste com o gerenciamento automático)
+await chatAgent.setFact('preferencia_clima', 'quente');
+```
+
 ## Extensões Possíveis
 
-1. **Persistência de Histórico**:
-   - Salvar o histórico em um banco de dados
-   - Carregar histórico de conversas anteriores
-
-2. **Resumo de Contexto**:
-   - Implementar um mecanismo para resumir conversas longas
-   - Manter apenas as informações mais relevantes
+1. **Aprimoramento do Sistema de Memória**:
+   - Implementar mecanismos de priorização de fatos
+   - Adicionar expiração de fatos baseada em tempo ou relevância
+   - Desenvolver estratégias de resolução de conflitos para fatos contraditórios
 
 3. **Múltiplos Usuários**:
    - Adaptar o agente para lidar com múltiplos usuários
