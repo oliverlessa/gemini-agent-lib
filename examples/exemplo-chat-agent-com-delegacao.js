@@ -47,7 +47,7 @@ Sua tarefa é fornecer traduções precisas e naturais, mantendo o tom e o estil
 Adapte expressões idiomáticas e referências culturais quando necessário para que façam sentido em português.
 Forneça apenas a tradução, sem explicações adicionais, a menos que seja solicitado.`,
         llmMode: 'oneshot',
-        llmModelName: "gemini-1.0-pro", // Modelo específico para este especialista
+        llmModelName: "gemini-2.0-flash-001", // Modelo específico para este especialista
         generationConfig: {
             temperature: 0.1 // Temperatura baixa para traduções mais precisas
         }
@@ -88,7 +88,7 @@ async function main() {
             llm: new VertexAILLM({
                 projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
                 credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-                modelName: "gemini-1.5-flash-001", // Modelo principal para o ChatAgent
+                modelName: "gemini-2.0-flash-001", // Modelo principal para o ChatAgent
                 mode: "chat",
                 generationConfig: {
                     maxOutputTokens: 2048,
