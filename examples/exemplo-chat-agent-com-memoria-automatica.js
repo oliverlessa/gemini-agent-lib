@@ -6,6 +6,7 @@
  */
 
 // Importações
+require('dotenv').config();
 const path = require('path');
 const { ChatAgent, VertexAILLM } = require('../index');
 // Classes base não são instanciadas diretamente, apenas os adaptadores
