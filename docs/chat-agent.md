@@ -426,8 +426,51 @@ const chatAgent = new ChatAgent({
   factMemory: factMemory,
   summaryMemory: summaryMemory,
   autoManageFactMemory: true,  // Habilita o gerenciamento automático de fatos
-  autoManageSummaryMemory: true  // Habilita o gerenciamento automático de resumos
+  autoManageSummaryMemory: true,  // Habilita o gerenciamento automático de resumos
+  chatId: "usuario123"  // ID opcional para a conversa (útil para integração com sistemas externos)
 });
+```
+
+### Uso de ID de Conversa Personalizado
+
+O `ChatAgent` permite o uso de um ID de conversa personalizado através do parâmetro `chatId`. Isso é especialmente útil para integração com sistemas externos que já possuem seus próprios identificadores de conversa.
+
+```javascript
+// Cria um ChatAgent com um ID de conversa personalizado
+const chatAgent = new ChatAgent({
+  // Outras configurações...
+  conversationMemory: conversationMemory,
+  factMemory: factMemory,
+  summaryMemory: summaryMemory,
+  chatId: "usuario_123_sessao_456"  // ID personalizado para a conversa
+});
+```
+
+#### Comportamento do chatId
+
+- Se `chatId` for fornecido como uma string não vazia, ele será usado como identificador para todas as operações de memória.
+- Se `chatId` não for fornecido (ou for uma string vazia) e algum tipo de memória estiver configurado, um UUID será gerado automaticamente.
+- Se nenhuma memória estiver configurada, o `chatId` será `null`, pois não é necessário.
+
+Este mecanismo permite:
+
+1. **Integração com sistemas existentes**: Use IDs de usuário, sessão ou conversa do seu sistema.
+2. **Continuidade entre sessões**: Retome conversas anteriores fornecendo o mesmo `chatId`.
+3. **Gerenciamento de múltiplos usuários**: Mantenha históricos separados para diferentes usuários.
+
+```javascript
+// Exemplo: Retomando uma conversa anterior
+const chatId = "usuario_123";  // ID armazenado no seu sistema
+
+// Cria um ChatAgent com o ID da conversa anterior
+const chatAgent = new ChatAgent({
+  // Configurações básicas...
+  conversationMemory: conversationMemory,
+  chatId: chatId
+});
+
+// O histórico da conversa anterior será carregado automaticamente
+// e o agente poderá continuar a conversa de onde parou
 ```
 
 ### Gerenciamento Manual de Memória
