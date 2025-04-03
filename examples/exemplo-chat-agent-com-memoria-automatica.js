@@ -8,14 +8,13 @@
 // Importações
 const path = require('path');
 const { ChatAgent, VertexAILLM } = require('../index');
-const { 
-  ConversationMemory, 
-  FactMemory, 
-  SummaryMemory,
-  SQLiteConversationMemoryAdapter,
-  SQLiteFactMemoryAdapter,
-  SQLiteSummaryMemoryAdapter
-} = require('../lib/memory');
+// Classes base não são instanciadas diretamente, apenas os adaptadores
+// const ConversationMemory = require('../lib/memory/conversation-memory');
+// const FactMemory = require('../lib/memory/fact-memory');
+// const SummaryMemory = require('../lib/memory/summary-memory');
+const SQLiteConversationMemoryAdapter = require('../lib/memory/sqlite-conversation-memory-adapter');
+const SQLiteFactMemoryAdapter = require('../lib/memory/sqlite-fact-memory-adapter');
+const SQLiteSummaryMemoryAdapter = require('../lib/memory/sqlite-summary-memory-adapter');
 
 // Função principal
 async function main() {
@@ -25,17 +24,10 @@ async function main() {
     // Configurar adaptadores de memória com SQLite
     const dbPath = path.join(__dirname, 'memoria_automatica.db');
     
-    const conversationMemory = new ConversationMemory({
-      adapter: new SQLiteConversationMemoryAdapter({ dbPath })
-    });
-    
-    const factMemory = new FactMemory({
-      adapter: new SQLiteFactMemoryAdapter({ dbPath })
-    });
-    
-    const summaryMemory = new SummaryMemory({
-      adapter: new SQLiteSummaryMemoryAdapter({ dbPath })
-    });
+    // Instanciar diretamente os adaptadores SQLite, pois eles herdam das classes base
+    const conversationMemory = new SQLiteConversationMemoryAdapter({ dbConfig: { dbPath } });
+    const factMemory = new SQLiteFactMemoryAdapter({ dbConfig: { dbPath } });
+    const summaryMemory = new SQLiteSummaryMemoryAdapter({ dbConfig: { dbPath } });
     
     // Criar instância do LLM
     const llm = new VertexAILLM({

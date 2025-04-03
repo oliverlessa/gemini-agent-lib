@@ -9,14 +9,15 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const { ChatAgent, VertexAILLM } = require('../index');
-const { 
-  ConversationMemory, 
-  FactMemory, 
-  SummaryMemory,
-  SQLiteConversationMemoryAdapter,
-  SQLiteFactMemoryAdapter,
-  SQLiteSummaryMemoryAdapter
-} = require('../lib/memory');
+// Importar adaptadores diretamente
+const SQLiteConversationMemoryAdapter = require('../lib/memory/sqlite-conversation-memory-adapter');
+const SQLiteFactMemoryAdapter = require('../lib/memory/sqlite-fact-memory-adapter');
+const SQLiteSummaryMemoryAdapter = require('../lib/memory/sqlite-summary-memory-adapter');
+// Classes base não são instanciadas diretamente
+// const ConversationMemory = require('../lib/memory/conversation-memory');
+// const FactMemory = require('../lib/memory/fact-memory');
+// const SummaryMemory = require('../lib/memory/summary-memory');
+
 
 // Configurações para o teste
 const TEST_DB_PATH = path.join(__dirname, 'test_auto_memory.db');
@@ -38,17 +39,17 @@ async function runTests() {
   cleanupTestDb();
   
   try {
-    // Criar adaptadores de memória para teste
-    const conversationMemory = new ConversationMemory({
-      adapter: new SQLiteConversationMemoryAdapter({ dbPath: TEST_DB_PATH })
+    // Criar adaptadores de memória para teste (instanciar adaptadores diretamente)
+    const conversationMemory = new SQLiteConversationMemoryAdapter({ 
+      dbConfig: { dbPath: TEST_DB_PATH } 
     });
     
-    const factMemory = new FactMemory({
-      adapter: new SQLiteFactMemoryAdapter({ dbPath: TEST_DB_PATH })
+    const factMemory = new SQLiteFactMemoryAdapter({ 
+      dbConfig: { dbPath: TEST_DB_PATH } 
     });
     
-    const summaryMemory = new SummaryMemory({
-      adapter: new SQLiteSummaryMemoryAdapter({ dbPath: TEST_DB_PATH })
+    const summaryMemory = new SQLiteSummaryMemoryAdapter({ 
+      dbConfig: { dbPath: TEST_DB_PATH } 
     });
     
     // Criar um mock do LLM para testes
