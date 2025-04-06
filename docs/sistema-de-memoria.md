@@ -352,17 +352,339 @@ const resposta = await chatAgent.processUserMessage("Olá!");
 console.log(resposta.text);
 ```
 
+### Uso com ID de Conversa Personalizado
+
+```javascript
+const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
+
+// Criar adaptadores de memória
+const conversationMemory = new memory.SQLiteConversationMemoryAdapter({
+    dbConfig: { dbPath: './chat_memory.db' }
+});
+
+// ID de conversa personalizado (pode ser um ID de usuário, sessão, etc.)
+const meuChatId = "usuario_123456";
+
+// Criar instância do ChatAgent com ID personalizado
+const chatAgent = new ChatAgent({
+    role: "Assistente Pessoal",
+    objective: "Ajudar o usuário com suas tarefas",
+    context: "Você é um assistente pessoal amigável e prestativo.",
+    llm: new VertexAILLM({ /* configuração do LLM */ }),
+    conversationMemory,
+    chatId: meuChatId // Fornecendo um ID personalizado
+});
+
+// Processar mensagens normalmente
+// O histórico e outros dados serão associados ao ID personalizado
+const resposta = await chatAgent.processUserMessage("Olá, como vai?");
+console.log(resposta.text);
+
+// Fechar a conexão quando terminar
+await conversationMemory.close();
+```
+
 ## Considerações Importantes
 
-1. **IDs de Conversa**: Quando qualquer tipo de memória persistente é configurado, o `ChatAgent` gera automaticamente um ID único (`chatId`) para a conversa, que é usado para associar as informações armazenadas.
+1. **IDs de Conversa**: Quando qualquer tipo de memória persistente é configurado, o `ChatAgent` gera automaticamente um ID único (`chatId`) para a conversa, que é usado para associar as informações armazenadas. Opcionalmente, o usuário pode fornecer seu próprio `chatId` ao instanciar o `ChatAgent` (passando-o no objeto de configuração), permitindo maior controle sobre a associação de dados.
 
 2. **Inicialização de Adaptadores MongoDB**: Os adaptadores MongoDB (`MongoDBConversationMemoryAdapter`, `MongoDBFactMemoryAdapter`, `MongoDBSummaryMemoryAdapter`) requerem inicialização explícita antes de serem utilizados. Você deve chamar o método `initialize()` e aguardar sua conclusão antes de criar o ChatAgent ou usar os adaptadores diretamente. Isso é necessário porque a conexão com o MongoDB é assíncrona e precisa ser estabelecida antes que qualquer operação seja realizada.
 
-3. **Fechamento de Conexões**: Sempre feche as conexões dos adaptadores de memória quando terminar de usá-los, usando o método `close()`.
+3. **Fechamento de Conexões**: Sempre feche as conexões dos adaptadores de memória quando terminar de usá-los, usando o método `close()`. Não fechar as conexões pode levar a:
+   - Vazamento de recursos (conexões de banco de dados, handles de arquivo)
+   - Possível corrupção de dados, especialmente com SQLite
+   - Impedir que a aplicação termine de forma limpa
+
+   **Exemplo de fechamento seguro com try/finally:**
+   ```javascript
+   // Criar adaptadores
+   const conversationMemory = new memory.SQLiteConversationMemoryAdapter({
+       dbConfig: { dbPath: './chat_memory.db' }
+   });
+   
+   try {
+       // Usar o adaptador normalmente
+       const chatAgent = new ChatAgent({
+           // ... outras configurações
+           conversationMemory
+       });
+       
+       // Processar mensagens
+       const resposta = await chatAgent.processUserMessage("Olá!");
+       console.log(resposta.text);
+   } finally {
+       // Garantir que a conexão seja fechada mesmo se ocorrerem erros
+       await conversationMemory.close();
+   }
+   ```
+
+   **Exemplo com múltiplos adaptadores:**
+   ```javascript
+   // Criar adaptadores
+   const conversationMemory = new memory.SQLiteConversationMemoryAdapter({/*...*/});
+   const factMemory = new memory.SQLiteFactMemoryAdapter({/*...*/});
+   const summaryMemory = new memory.SQLiteSummaryMemoryAdapter({/*...*/});
+   
+   try {
+       // Usar os adaptadores
+       // ...
+   } finally {
+       // Fechar todas as conexões
+       await Promise.all([
+           conversationMemory.close(),
+           factMemory.close(),
+           summaryMemory.close()
+       ]);
+   }
+   ```
+
+   **Tratamento de sinais para aplicações de longa duração:**
+   ```javascript
+   // Criar adaptadores
+   const conversationMemory = new memory.MongoDBConversationMemoryAdapter({/*...*/});
+   await conversationMemory.initialize();
+   
+   // Configurar handler para desligamento elegante
+   process.on('SIGINT', async () => {
+       console.log('Fechando conexões antes de encerrar...');
+       try {
+           await conversationMemory.close();
+           console.log('Conexões fechadas com sucesso');
+       } catch (error) {
+           console.error('Erro ao fechar conexões:', error);
+       }
+       process.exit(0);
+   });
+   
+   // Usar o adaptador normalmente
+   // ...
+   ```
+
+   > **Nota importante:** O evento `process.on('exit')` NÃO é adequado para fechar conexões, pois ele só permite operações síncronas, e o fechamento de conexões é uma operação assíncrona. Use `SIGINT`, `SIGTERM` ou outros sinais apropriados.
 
 4. **Tratamento de Erros**: Os métodos de memória do `ChatAgent` tratam erros internamente e não falham completamente se a persistência falhar. Isso garante que o agente continue funcionando mesmo se houver problemas com o banco de dados.
 
 5. **Uso Independente**: Você pode usar apenas um ou dois tipos de memória, dependendo das suas necessidades. Por exemplo, você pode usar apenas `ConversationMemory` para persistir o histórico de mensagens, sem usar `FactMemory` ou `SummaryMemory`.
+
+6. **Prevenção de Vazamento de Recursos**: Para ajudar a prevenir problemas relacionados ao não fechamento de conexões, considere as seguintes estratégias:
+   
+   - **Padrão de Wrapper**: Crie uma função ou classe wrapper que gerencie o ciclo de vida dos adaptadores:
+     ```javascript
+     class MemoryManager {
+       constructor() {
+         this.adapters = [];
+       }
+     
+       addAdapter(adapter) {
+         this.adapters.push(adapter);
+         return adapter;
+       }
+     
+       async closeAll() {
+         await Promise.all(this.adapters.map(adapter => adapter.close()));
+       }
+     }
+     
+     // Uso
+     const memoryManager = new MemoryManager();
+     const conversationMemory = memoryManager.addAdapter(
+       new memory.SQLiteConversationMemoryAdapter({/*...*/})
+     );
+     
+     // No final da aplicação
+     await memoryManager.closeAll();
+     ```
+   
+   - **Middleware para Express/Koa**: Em aplicações web, implemente um middleware que rastreie e feche conexões no final do ciclo de vida da aplicação:
+     ```javascript
+     // Express middleware exemplo
+     app.use((req, res, next) => {
+       // Registrar adaptadores criados durante a requisição
+       req.memoryAdapters = [];
+       
+       // Adicionar método helper
+       req.registerAdapter = (adapter) => {
+         req.memoryAdapters.push(adapter);
+         return adapter;
+       };
+       
+       // Fechar conexões após a resposta ser enviada
+       res.on('finish', async () => {
+         if (req.memoryAdapters.length > 0) {
+           await Promise.all(req.memoryAdapters.map(adapter => adapter.close()));
+         }
+       });
+       
+       next();
+     });
+     ```
+   
+   - **Classe de Gerenciamento Automático**: Implemente uma classe auxiliar que registre e gerencie automaticamente os adaptadores de memória:
+     ```javascript
+     // memory-manager.js
+     class MemoryManager {
+       static instance;
+       
+       constructor() {
+         if (MemoryManager.instance) {
+           return MemoryManager.instance;
+         }
+         
+         this.adapters = new Set();
+         this._setupShutdownHandlers();
+         MemoryManager.instance = this;
+       }
+       
+       register(adapter) {
+         this.adapters.add(adapter);
+         return adapter;
+       }
+       
+       async closeAll() {
+         const closePromises = [];
+         for (const adapter of this.adapters) {
+           closePromises.push(adapter.close().catch(err => {
+             console.error('Erro ao fechar adaptador:', err);
+           }));
+         }
+         await Promise.all(closePromises);
+         this.adapters.clear();
+       }
+       
+       _setupShutdownHandlers() {
+         // Capturar sinais de término
+         ['SIGINT', 'SIGTERM'].forEach(signal => {
+           process.on(signal, async () => {
+             console.log(`Sinal ${signal} recebido. Fechando conexões...`);
+             await this.closeAll();
+             process.exit(0);
+           });
+         });
+         
+         // Capturar exceções não tratadas
+         process.on('uncaughtException', async (err) => {
+           console.error('Exceção não tratada:', err);
+           await this.closeAll();
+           process.exit(1);
+         });
+       }
+     }
+     
+     // Uso na aplicação
+     const manager = new MemoryManager();
+     
+     // Ao criar adaptadores
+     const conversationMemory = manager.register(
+       new memory.SQLiteConversationMemoryAdapter({/*...*/})
+     );
+     
+     // Não é necessário chamar close() manualmente para desligamento normal
+     // O gerenciador cuidará disso quando a aplicação for encerrada
+     ```
+
+## Implementação de Proteção na Biblioteca
+
+Para ajudar a prevenir problemas relacionados ao não fechamento de conexões, a biblioteca poderia implementar mecanismos de proteção internos. Abaixo está um exemplo conceitual de como isso poderia ser implementado:
+
+```javascript
+// Exemplo conceitual de implementação na biblioteca
+class BaseMemoryAdapter {
+  constructor() {
+    // Registrar o adaptador no registro global
+    MemoryAdapterRegistry.register(this);
+  }
+  
+  async close() {
+    // Implementação específica de fechamento
+    // ...
+    
+    // Remover do registro após fechar
+    MemoryAdapterRegistry.unregister(this);
+  }
+}
+
+// Registro global de adaptadores
+class MemoryAdapterRegistry {
+  static adapters = new WeakSet();
+  static initialized = false;
+  
+  static initialize() {
+    if (this.initialized) return;
+    
+    // Configurar handlers de desligamento
+    ['SIGINT', 'SIGTERM'].forEach(signal => {
+      process.on(signal, async () => {
+        console.log(`[gemini-agent-lib] Sinal ${signal} recebido. Fechando conexões de memória...`);
+        await MemoryAdapterRegistry.closeAll();
+        // Não chamamos process.exit() aqui para permitir que a aplicação
+        // faça seu próprio tratamento de desligamento
+      });
+    });
+    
+    // Aviso de finalização
+    process.on('exit', () => {
+      const count = MemoryAdapterRegistry.getActiveCount();
+      if (count > 0) {
+        console.warn(`[gemini-agent-lib] Aviso: ${count} conexões de adaptadores de memória não foram fechadas explicitamente.`);
+      }
+    });
+    
+    this.initialized = true;
+  }
+  
+  static register(adapter) {
+    this.initialize();
+    this.adapters.add(adapter);
+  }
+  
+  static unregister(adapter) {
+    this.adapters.delete(adapter);
+  }
+  
+  static getActiveCount() {
+    // WeakSet não tem método size, esta é uma aproximação conceitual
+    // Na implementação real, precisaríamos rastrear o contador separadamente
+    return [...this.adapters].length;
+  }
+  
+  static async closeAll() {
+    const closePromises = [];
+    for (const adapter of this.adapters) {
+      closePromises.push(adapter.close().catch(err => {
+        console.error('[gemini-agent-lib] Erro ao fechar adaptador:', err);
+      }));
+    }
+    await Promise.all(closePromises);
+  }
+}
+
+// Implementação nos adaptadores específicos
+class SQLiteConversationMemoryAdapter extends BaseMemoryAdapter {
+  // ...implementação existente
+}
+
+class MongoDBConversationMemoryAdapter extends BaseMemoryAdapter {
+  // ...implementação existente
+}
+```
+
+> **Nota importante:** Esta implementação é conceitual e ilustrativa. A implementação real precisaria lidar com várias complexidades adicionais, como evitar fechamentos duplicados, gerenciar o ciclo de vida dos adaptadores de forma thread-safe, e garantir que o registro não impeça a coleta de lixo dos adaptadores não utilizados (daí o uso de WeakSet).
+
+### Considerações sobre a Implementação na Biblioteca
+
+1. **Prós:**
+   - Fornece uma rede de segurança para desenvolvedores que esquecem de fechar conexões
+   - Reduz a probabilidade de vazamentos de recursos em aplicações de produção
+   - Simplifica o código do cliente, que não precisa se preocupar tanto com o gerenciamento de conexões
+
+2. **Contras:**
+   - Pode criar comportamentos inesperados se a aplicação tiver sua própria lógica de gerenciamento de desligamento
+   - Adiciona complexidade à biblioteca
+   - Pode dar aos desenvolvedores uma falsa sensação de segurança, levando a práticas de codificação menos rigorosas
+
+3. **Recomendação:**
+   - Mesmo com mecanismos de proteção na biblioteca, os desenvolvedores devem sempre fechar explicitamente as conexões quando possível
+   - Considere os mecanismos automáticos como uma rede de segurança, não como a abordagem principal
 
 ## Exemplos
 
