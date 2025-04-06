@@ -53,6 +53,12 @@ async function main() {
             }
         });
         
+        // Inicializar as conexões com o MongoDB
+        console.log("Inicializando conexões com o MongoDB...");
+        await conversationMemory.initialize();
+        await factMemory.initialize();
+        await summaryMemory.initialize();
+        
         // Criar instância do ChatAgent com memória MongoDB
         const chatAgent = new ChatAgent({
             role: "Assistente Pessoal",

@@ -81,10 +81,13 @@ Adaptadores para armazenamento em banco de dados MongoDB:
 - `MongoDBFactMemoryAdapter`
 - `MongoDBSummaryMemoryAdapter`
 
+**Importante:** Os adaptadores MongoDB requerem inicialização explícita antes de serem utilizados. Você deve chamar o método `initialize()` e aguardar sua conclusão antes de usar o adaptador.
+
 Configuração:
 ```javascript
 const { memory } = require('gemini-agent-lib');
 
+// Criar o adaptador
 const conversationMemory = new memory.MongoDBConversationMemoryAdapter({
     dbConfig: {
         connectionUri: 'mongodb://localhost:27017',
@@ -92,6 +95,11 @@ const conversationMemory = new memory.MongoDBConversationMemoryAdapter({
         collectionName: 'chat_history' // opcional, padrão é 'chat_history'
     }
 });
+
+// Inicializar a conexão (importante!)
+await conversationMemory.initialize();
+
+// Agora o adaptador está pronto para uso
 ```
 
 ## Gerenciamento Automático de Memórias
@@ -177,7 +185,7 @@ Isso proporciona flexibilidade para combinar a extração automática com a adi�
 
 ## Uso com ChatAgent
 
-### Configuração Básica
+### Configuração Básica com SQLite
 
 ```javascript
 const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
@@ -202,6 +210,73 @@ console.log(resposta.text);
 
 // Fechar a conexão quando terminar
 await conversationMemory.close();
+```
+
+### Configuração com MongoDB
+
+```javascript
+const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
+
+// Configuração do MongoDB
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_DB_NAME = 'gemini_agent_memory';
+
+// Criar instâncias dos adaptadores de memória MongoDB
+const conversationMemory = new memory.MongoDBConversationMemoryAdapter({
+    dbConfig: {
+        connectionUri: MONGODB_URI,
+        dbName: MONGODB_DB_NAME,
+        collectionName: 'chat_history'
+    }
+});
+
+const factMemory = new memory.MongoDBFactMemoryAdapter({
+    dbConfig: {
+        connectionUri: MONGODB_URI,
+        dbName: MONGODB_DB_NAME,
+        collectionName: 'facts'
+    }
+});
+
+const summaryMemory = new memory.MongoDBSummaryMemoryAdapter({
+    dbConfig: {
+        connectionUri: MONGODB_URI,
+        dbName: MONGODB_DB_NAME,
+        collectionName: 'summaries'
+    }
+});
+
+// IMPORTANTE: Inicializar as conexões com o MongoDB antes de usar os adaptadores
+await conversationMemory.initialize();
+await factMemory.initialize();
+await summaryMemory.initialize();
+
+// Criar instância do LLM
+const llm = new VertexAILLM({
+    projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+    modelName: "gemini-2.0-flash-001",
+    mode: "chat"
+});
+
+// Criar instância do ChatAgent com memória MongoDB
+const chatAgent = new ChatAgent({
+    role: "Assistente Pessoal",
+    objective: "Ajudar o usuário com suas tarefas",
+    context: "Você é um assistente pessoal amigável e prestativo.",
+    llm,
+    conversationMemory,
+    factMemory,
+    summaryMemory
+});
+
+// Processar mensagens normalmente
+const resposta = await chatAgent.processUserMessage("Olá, como vai?");
+console.log(resposta.text);
+
+// Fechar as conexões quando terminar
+await conversationMemory.close();
+await factMemory.close();
+await summaryMemory.close();
 ```
 
 ### Uso Completo (Todos os Tipos de Memória)
@@ -281,11 +356,13 @@ console.log(resposta.text);
 
 1. **IDs de Conversa**: Quando qualquer tipo de memória persistente é configurado, o `ChatAgent` gera automaticamente um ID único (`chatId`) para a conversa, que é usado para associar as informações armazenadas.
 
-2. **Fechamento de Conexões**: Sempre feche as conexões dos adaptadores de memória quando terminar de usá-los, usando o método `close()`.
+2. **Inicialização de Adaptadores MongoDB**: Os adaptadores MongoDB (`MongoDBConversationMemoryAdapter`, `MongoDBFactMemoryAdapter`, `MongoDBSummaryMemoryAdapter`) requerem inicialização explícita antes de serem utilizados. Você deve chamar o método `initialize()` e aguardar sua conclusão antes de criar o ChatAgent ou usar os adaptadores diretamente. Isso é necessário porque a conexão com o MongoDB é assíncrona e precisa ser estabelecida antes que qualquer operação seja realizada.
 
-3. **Tratamento de Erros**: Os métodos de memória do `ChatAgent` tratam erros internamente e não falham completamente se a persistência falhar. Isso garante que o agente continue funcionando mesmo se houver problemas com o banco de dados.
+3. **Fechamento de Conexões**: Sempre feche as conexões dos adaptadores de memória quando terminar de usá-los, usando o método `close()`.
 
-4. **Uso Independente**: Você pode usar apenas um ou dois tipos de memória, dependendo das suas necessidades. Por exemplo, você pode usar apenas `ConversationMemory` para persistir o histórico de mensagens, sem usar `FactMemory` ou `SummaryMemory`.
+4. **Tratamento de Erros**: Os métodos de memória do `ChatAgent` tratam erros internamente e não falham completamente se a persistência falhar. Isso garante que o agente continue funcionando mesmo se houver problemas com o banco de dados.
+
+5. **Uso Independente**: Você pode usar apenas um ou dois tipos de memória, dependendo das suas necessidades. Por exemplo, você pode usar apenas `ConversationMemory` para persistir o histórico de mensagens, sem usar `FactMemory` ou `SummaryMemory`.
 
 ## Exemplos
 
