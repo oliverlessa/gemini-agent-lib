@@ -13,8 +13,8 @@ if (!process.env.VERTEX_PROJECT_ID) {
     process.exit(1);
 }
 
-if (!process.env.VERTEX_CREDENTIALS_PATH) {
-    console.error("Erro: VERTEX_CREDENTIALS_PATH não encontrado nas variáveis de ambiente.");
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    console.error("Erro: GOOGLE_APPLICATION_CREDENTIALS não encontrado nas variáveis de ambiente.");
     process.exit(1);
 }
 
@@ -26,7 +26,7 @@ async function testarAutoGenOrchestrator() {
         // Instancia o AutoGenOrchestrator com configurações completas da Vertex AI
         const orchestrator = new AutoGenOrchestrator({
             apiKey: process.env.VERTEX_API_KEY,
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-2.0-flash-001", // Modelo que suporta Google Search

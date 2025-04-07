@@ -17,7 +17,7 @@ async function testGoogleSearch() {
         });
 
         const vertexLLM = new VertexAILLM({
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-2.0-flash",
@@ -142,7 +142,7 @@ async function testGoogleSearchVertexAI() {
         // Criar instância do VertexAILLM com credenciais do .env
         const vertexLLM = new VertexAILLM({
             apiKey: process.env.VERTEX_API_KEY,
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-2.0-flash-001", // ou outro modelo que suporte Google Search

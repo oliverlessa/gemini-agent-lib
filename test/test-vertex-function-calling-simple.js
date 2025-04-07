@@ -8,12 +8,12 @@ async function testVertexFunctionCallingSimple() {
     try {
         console.log("Iniciando teste simplificado de function calling com Vertex AI...");
 
-        console.log(process.env.VERTEX_CREDENTIALS_PATH);
+        console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         
         // Criar instância do VertexAILLM
         const vertexLLM = new VertexAILLM({
             apiKey: process.env.VERTEX_API_KEY,
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-1.0-pro",

@@ -29,7 +29,7 @@ Para executar estes testes, você precisa:
 # Credenciais do Vertex AI
 VERTEX_API_KEY=sua_api_key_aqui
 # OU
-VERTEX_CREDENTIALS_PATH=/caminho/para/seu/arquivo-de-credenciais.json
+GOOGLE_APPLICATION_CREDENTIALS=/caminho/para/seu/arquivo-de-credenciais.json
 
 # Configurações do Projeto
 VERTEX_PROJECT_ID=seu_project_id_do_google_cloud

@@ -19,14 +19,12 @@ npm install @google-cloud/discoveryengine
 Para usar a ferramenta, você precisa configurar as seguintes variáveis de ambiente:
 
 1. `VERTEX_PROJECT_ID`: ID do projeto no Google Cloud
-2. `VERTEX_CREDENTIALS_PATH`: Caminho para o arquivo de credenciais do Google Cloud
-3. `GOOGLE_APPLICATION_CREDENTIALS`: Caminho para o arquivo de credenciais (pode ser o mesmo que `VERTEX_CREDENTIALS_PATH`)
+2. `GOOGLE_APPLICATION_CREDENTIALS`: Caminho para o arquivo de credenciais do Google Cloud
 
 Exemplo de configuração no arquivo `.env`:
 
 ```
 VERTEX_PROJECT_ID=789802124107
-VERTEX_CREDENTIALS_PATH=./gcp-fainor-vertex-all-07acd8705b36.json
 GOOGLE_APPLICATION_CREDENTIALS=./gcp-fainor-vertex-all-07acd8705b36.json
 ```
 
@@ -78,7 +76,7 @@ const vertexSearchRetrieverTool = require('./gemini-chain-lib/tools/vertex-ai-se
 async function testarAgenteComBusca() {
     // Criar instância do VertexAILLM
     const vertexLLM = new VertexAILLM({
-        credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+        credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
         projectId: process.env.VERTEX_PROJECT_ID,
         location: "us-central1",
         modelName: "gemini-1.0-pro",

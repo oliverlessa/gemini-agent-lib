@@ -1,11 +1,7 @@
 // test-vertex-ai-search-retriever.js
 require('dotenv').config();
 
-// Configurar a variável de ambiente GOOGLE_APPLICATION_CREDENTIALS
-if (process.env.VERTEX_CREDENTIALS_PATH && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = process.env.VERTEX_CREDENTIALS_PATH;
-    console.log("GOOGLE_APPLICATION_CREDENTIALS configurado para:", process.env.GOOGLE_APPLICATION_CREDENTIALS);
-}
+// A variável GOOGLE_APPLICATION_CREDENTIALS deve estar configurada no ambiente
 const VertexAILLM = require('../lib/vertex-ai-llm');
 const Agent = require('../lib/agent');
 const vertexSearchRetrieverTool = require('../lib/tools/vertex-ai-search-retriever-tool');
@@ -26,17 +22,17 @@ async function testVertexAISearchRetriever() {
             return;
         }
         
-        if (!process.env.VERTEX_CREDENTIALS_PATH) {
-            console.error("Erro: VERTEX_CREDENTIALS_PATH não definido no arquivo .env");
+        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+            console.error("Erro: GOOGLE_APPLICATION_CREDENTIALS não definido no arquivo .env");
             return;
         }
         
         console.log("VERTEX_PROJECT_ID:", process.env.VERTEX_PROJECT_ID);
-        console.log("VERTEX_CREDENTIALS_PATH:", process.env.VERTEX_CREDENTIALS_PATH);
+        console.log("GOOGLE_APPLICATION_CREDENTIALS:", process.env.GOOGLE_APPLICATION_CREDENTIALS);
         
         // Criar instância do VertexAILLM
         const vertexLLM = new VertexAILLM({
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-1.0-pro",

@@ -20,7 +20,7 @@ async function exemploToolFactory() {
         
         // Criar instância do VertexAILLM
         const vertexLLM = new VertexAILLM({
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-1.0-pro",

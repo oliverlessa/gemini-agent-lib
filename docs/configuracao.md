@@ -39,7 +39,7 @@ VERTEX_API_KEY=sua_chave_api_vertex
 GOOGLE_CLOUD_PROJECT_ID=seu_id_projeto_gcp
 VERTEX_PROJECT_ID=seu_id_projeto_vertex
 VERTEX_LOCATION=regiao_vertex
-VERTEX_CREDENTIALS_PATH=./caminho_para_arquivo_credenciais.json
+# VERTEX_CREDENTIALS_PATH foi removido para padronização
 GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
 ```
 
@@ -71,8 +71,8 @@ GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
 **Valores comuns**: `us-central1`, `europe-west4`, `asia-east1`.  
 **Observação**: Escolha a região mais próxima de seus usuários ou que atenda aos requisitos de residência de dados.
 
-### VERTEX_CREDENTIALS_PATH
-**Descrição**: O caminho no seu sistema de arquivos para o arquivo JSON contendo a chave da conta de serviço do Google Cloud.  
+### GOOGLE_APPLICATION_CREDENTIALS
+**Descrição**: Variável de ambiente padrão que as bibliotecas do Google Cloud usam para encontrar automaticamente as credenciais de autenticação. O caminho no seu sistema de arquivos para o arquivo JSON contendo a chave da conta de serviço do Google Cloud.  
 **Obrigatoriedade**: Necessário para autenticação segura com as APIs do GCP/Vertex AI.  
 **Como obter**:
 1. Acesse o [Console do Google Cloud](https://console.cloud.google.com/)
@@ -81,11 +81,6 @@ GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
 4. Adicione as permissões necessárias (pelo menos "Vertex AI User")
 5. Crie uma chave para esta conta de serviço (formato JSON)
 6. Faça o download do arquivo JSON e salve-o em um local seguro no seu projeto
-
-### GOOGLE_APPLICATION_CREDENTIALS
-**Descrição**: Variável de ambiente padrão que muitas bibliotecas do Google Cloud usam para encontrar automaticamente as credenciais de autenticação.  
-**Obrigatoriedade**: Recomendado para maior compatibilidade com bibliotecas do Google Cloud.  
-**Observação**: Geralmente, aponta para o mesmo arquivo JSON que `VERTEX_CREDENTIALS_PATH`. Definir ambos garante maior compatibilidade.
 
 ## Configuração Mínima
 

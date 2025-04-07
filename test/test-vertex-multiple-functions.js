@@ -13,12 +13,12 @@ async function testVertexMultipleFunctions() {
         console.log("Iniciando teste de múltiplas funções com Vertex AI...");
         
         // Criar instância do VertexAILLM com credenciais do .env
-        // console.log("VERTEX_CREDENTIALS_PATH:", process.env.VERTEX_CREDENTIALS_PATH);
+        // console.log("GOOGLE_APPLICATION_CREDENTIALS:", process.env.GOOGLE_APPLICATION_CREDENTIALS);
         // console.log("VERTEX_PROJECT_ID:", process.env.VERTEX_PROJECT_ID);
         
         const vertexLLM = new VertexAILLM({
             apiKey: process.env.VERTEX_API_KEY,
-            credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
             modelName: "gemini-2.0-flash-001", // ou outro modelo que suporte function calling

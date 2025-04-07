@@ -13,7 +13,7 @@ async function testarAgenteVertexAI() {
     // 1. Inicializa o LLM Vertex AI
     const llm = new VertexAILLM({
         projectId: process.env.VERTEX_PROJECT_ID,
-        credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+        credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
         modelName: "gemini-2.0-flash-001",
         generationConfig: {
             maxOutputTokens: 2048,

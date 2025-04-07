@@ -25,7 +25,7 @@ async function testThinkingAgent() {
             // Se useVertexAI for true, adicionar:
             // vertexConfig: {
             //     projectId: process.env.VERTEX_PROJECT_ID,
-            //     credentialsPath: process.env.VERTEX_CREDENTIALS_PATH,
+            //     credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             //     location: process.env.VERTEX_LOCATION || 'us-central1'
             // }
         });

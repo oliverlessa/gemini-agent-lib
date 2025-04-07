@@ -49,7 +49,6 @@ VERTEX_API_KEY=sua_chave_api_vertex
 GOOGLE_CLOUD_PROJECT_ID=seu_id_projeto_gcp
 VERTEX_PROJECT_ID=seu_id_projeto_vertex
 VERTEX_LOCATION=regiao_vertex
-VERTEX_CREDENTIALS_PATH=./caminho_para_arquivo_credenciais.json
 GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
 ```
 
