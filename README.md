@@ -107,6 +107,21 @@ Para documentação detalhada sobre cada componente, consulte a pasta [docs](./d
 - [Modo Chat Vertex AI](./docs/modo-chat-vertex-ai.md)
 - [Formatadores Personalizados](./docs/formatadores-personalizados.md)
 - [Dependências de Agentes](./docs/dependencias-agentes.md)
+- [Sistema de Debug](./docs/sistema-de-debug.md)
+
+## Debug e Logs
+
+A biblioteca utiliza o pacote `debug` para gerenciar mensagens de depuração. Por padrão, nenhuma mensagem de debug é exibida. Para ativar:
+
+```bash
+# Ativar todos os logs da biblioteca
+DEBUG=gemini-agent-lib:* node seu-script.js
+
+# Ativar apenas logs específicos
+DEBUG=gemini-agent-lib:agent,gemini-agent-lib:chat-agent node seu-script.js
+```
+
+Para mais detalhes, consulte a [documentação do sistema de debug](./docs/sistema-de-debug.md).
 
 ## Exemplos
 
