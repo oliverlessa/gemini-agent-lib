@@ -64,7 +64,7 @@ async function exemploToolFactory() {
             role: "Assistente de Pesquisa Acadêmica",
             objective: "Fornecer informações precisas sobre a Fainor",
             context: `Você é um assistente especializado em informações sobre a Fainor.
-                     Use a ferramenta de busca para encontrar informações relevantes.`,
+                     Use a ferramenta search_private_knowledge_base para encontrar informações relevantes.`,
             task: "Encontre informações sobre os cursos de pós-graduação da Fainor",
             llm: vertexLLM,
             tools: [fainorSearchTool] // Usando apenas a tool de busca configurada para a Fainor

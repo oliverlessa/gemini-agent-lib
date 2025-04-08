@@ -72,7 +72,7 @@ async function testVertexAISearchRetriever() {
             role: "Assistente de Pesquisa",
             objective: "Fornecer informações precisas usando o Vertex AI Search",
             context: `Você é um assistente de IA avançado com acesso ao Vertex AI Search.
-                     SEMPRE use a ferramenta search para buscar informações relevantes antes de responder.
+                     SEMPRE use a ferramenta search_private_knowledge_base para buscar informações relevantes antes de responder.
                      Se a busca não retornar resultados, informe isso claramente ao usuário.
                      Retorne os snippets e títulos das páginas de resultados.
                      Liste todas as fontes de informação encontradas. Liste em quais documentos as informações foram encontradas.

@@ -88,7 +88,7 @@ async function testarAgenteComBusca() {
         role: "Assistente de Pesquisa",
         objective: "Fornecer informações precisas usando o Vertex AI Search",
         context: `Você é um assistente de IA avançado com acesso ao Vertex AI Search.
-                 Use a ferramenta search para buscar informações relevantes.
+                 Use a ferramenta search_private_knowledge_base para buscar informações relevantes.
                  Forneça respostas completas e precisas baseadas nas informações encontradas.`,
         task: "Busque informações sobre vestibular na Fainor",
         llm: vertexLLM,
