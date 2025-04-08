@@ -59,6 +59,16 @@ async function testVertexAISearchRetriever() {
         });
         console.log("2. Instância personalizada criada com dataStoreId pré-configurado");
         
+        // 3. Instância com descrição personalizada
+        const customDescriptionTool = vertexSearchRetrieverTool({
+            projectId: process.env.VERTEX_PROJECT_ID,
+            location: "global",
+            dataStoreId: "site-fainor_1714866492522",
+            maxResults: 5,
+            description: "Ferramenta especializada para buscar informações sobre a Fainor no Vertex AI Search"
+        });
+        console.log("3. Instância criada com descrição personalizada");
+        
         const fainorSearchTool = vertexSearchRetrieverTool({
             projectId: process.env.VERTEX_PROJECT_ID,
             location: "global",
@@ -80,7 +90,7 @@ async function testVertexAISearchRetriever() {
                      Não acresente nenhuma informação que não esteja nos resultados da busca.`,
             task: "", // Será definida abaixo
             llm: vertexLLM,
-            tools: [fainorSearchTool] // Usando a instância personalizadax
+            tools: [customDescriptionTool] // Usando a instância com descrição personalizada
         });
         
         // Definir tarefas para testar a ferramenta
@@ -95,7 +105,7 @@ async function testVertexAISearchRetriever() {
             
             try {
                 // Testar a ferramenta através do agente
-                console.log("\n3. Testando a ferramenta através do agente (usando a instância personalizada):");
+                console.log("\n4. Testando a ferramenta através do agente (usando a instância com descrição personalizada):");
                 const resposta = await agente.executeTask();
                 console.log(`\nResposta do Agente:\n${resposta}`);
             } catch (error) {

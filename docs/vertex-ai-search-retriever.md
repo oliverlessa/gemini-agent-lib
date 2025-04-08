@@ -30,7 +30,9 @@ GOOGLE_APPLICATION_CREDENTIALS=./gcp-fainor-vertex-all-07acd8705b36.json
 
 ## Parâmetros
 
-A ferramenta aceita os seguintes parâmetros:
+### Parâmetros de Execução
+
+Estes são os parâmetros aceitos durante a execução da ferramenta:
 
 | Parâmetro | Tipo | Obrigatório | Descrição | Valor Padrão |
 |-----------|------|-------------|-----------|--------------|
@@ -42,7 +44,55 @@ A ferramenta aceita os seguintes parâmetros:
 | servingConfigId | string | Não | ID da configuração de serviço | "default_config" |
 | maxResults | number | Não | Número máximo de resultados | 10 |
 
+### Parâmetros de Configuração da Factory
+
+Estes são os parâmetros aceitos ao criar uma instância da ferramenta usando a factory function:
+
+| Parâmetro | Tipo | Obrigatório | Descrição | Valor Padrão |
+|-----------|------|-------------|-----------|--------------|
+| projectId | string | Não | ID do projeto Google Cloud | Valor de `VERTEX_PROJECT_ID` |
+| location | string | Não | Localização do serviço (global, us, eu) | "global" |
+| collectionId | string | Não | ID da coleção | "default_collection" |
+| dataStoreId | string | Não | ID do data store | - |
+| servingConfigId | string | Não | ID da configuração de serviço | "default_config" |
+| maxResults | number | Não | Número máximo de resultados | 10 |
+| description | string | Não | Descrição personalizada da ferramenta | Descrição padrão |
+| name | string | Não | Nome personalizado da ferramenta | "search_private_knowledge_base" |
+
 ## Uso Básico
+
+### Criação de Instâncias da Ferramenta
+
+A ferramenta `vertexSearchRetrieverTool` é uma factory function que permite criar instâncias personalizadas:
+
+```javascript
+const vertexSearchRetrieverTool = require('./gemini-chain-lib/tools/vertex-ai-search-retriever-tool');
+
+// 1. Instância padrão (sem configurações personalizadas)
+const defaultTool = vertexSearchRetrieverTool();
+
+// 2. Instância com configurações específicas
+const customTool = vertexSearchRetrieverTool({
+    projectId: process.env.VERTEX_PROJECT_ID,
+    location: "global",
+    dataStoreId: "meu-data-store-id",
+    maxResults: 5
+});
+
+// 3. Instância com descrição personalizada
+const customDescriptionTool = vertexSearchRetrieverTool({
+    projectId: process.env.VERTEX_PROJECT_ID,
+    dataStoreId: "meu-data-store-id",
+    description: "Ferramenta especializada para buscar informações sobre produtos no catálogo da empresa"
+});
+
+// 4. Instância com nome e descrição personalizados
+const customNameAndDescriptionTool = vertexSearchRetrieverTool({
+    dataStoreId: "meu-data-store-id",
+    name: "buscar_produtos",
+    description: "Busca produtos no catálogo da empresa usando Vertex AI Search"
+});
+```
 
 ### Uso Direto da Ferramenta
 
@@ -51,10 +101,15 @@ const vertexSearchRetrieverTool = require('./gemini-chain-lib/tools/vertex-ai-se
 
 async function testarBusca() {
     try {
-        const resultado = await vertexSearchRetrieverTool.function({
-            query: "Vestibular Fainor",
+        // Criar uma instância da ferramenta
+        const searchTool = vertexSearchRetrieverTool({
             dataStoreId: "site-fainor_1714866492522",
             maxResults: 5
+        });
+        
+        // Executar a busca
+        const resultado = await searchTool.function({
+            query: "Vestibular Fainor"
         });
         
         console.log("Resultados da busca:", JSON.stringify(resultado, null, 2));
@@ -83,7 +138,16 @@ async function testarAgenteComBusca() {
         mode: "oneshot"
     });
     
-    // Criar o agente com a ferramenta Vertex AI Search Retriever
+    // Criar uma instância personalizada da ferramenta
+    const fainorSearchTool = vertexSearchRetrieverTool({
+        projectId: process.env.VERTEX_PROJECT_ID,
+        location: "global",
+        dataStoreId: "site-fainor_1714866492522",
+        maxResults: 5,
+        description: "Ferramenta especializada para buscar informações sobre a Fainor no Vertex AI Search"
+    });
+    
+    // Criar o agente com a ferramenta personalizada
     const agente = new Agent({
         role: "Assistente de Pesquisa",
         objective: "Fornecer informações precisas usando o Vertex AI Search",
@@ -92,7 +156,7 @@ async function testarAgenteComBusca() {
                  Forneça respostas completas e precisas baseadas nas informações encontradas.`,
         task: "Busque informações sobre vestibular na Fainor",
         llm: vertexLLM,
-        tools: [vertexSearchRetrieverTool]
+        tools: [fainorSearchTool]
     });
     
     // Executar a tarefa

@@ -39,9 +39,10 @@ async function exemploToolFactory() {
             projectId: process.env.VERTEX_PROJECT_ID,
             location: "global",
             dataStoreId: "site-fainor_1714866492522",
-            maxResults: 5
+            maxResults: 5,
+            description: "Ferramenta especializada para buscar informações sobre a Fainor no Vertex AI Search"
         });
-        console.log("   - Tool de busca para o site da Fainor criada");
+        console.log("   - Tool de busca para o site da Fainor criada com descrição personalizada");
         
         // Tool de clima com unidade em Fahrenheit
         const fahrenheitWeatherTool = weatherTool({
