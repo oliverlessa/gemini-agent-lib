@@ -2,6 +2,7 @@
 
 const Agent = require('./lib/agent');
 const ChatAgent = require('./lib/chat-agent');
+const ChatManager = require('./lib/chat-manager');
 const GenerativeAILLM = require('./lib/generative-ai-llm');
 const VertexAILLM = require('./lib/vertex-ai-llm');
 const SequentialAgentChain = require('./lib/sequential-agent-chain');
@@ -33,6 +34,7 @@ module.exports = {
     // Componentes principais
     Agent,
     ChatAgent,
+    ChatManager,
     GenerativeAILLM,
     VertexAILLM,
     SequentialAgentChain,
