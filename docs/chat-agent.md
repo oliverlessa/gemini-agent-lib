@@ -207,6 +207,7 @@ const resposta = await chatAgent.processUserMessage("Olá novamente!");
 4. **Integração com Outros Componentes**:
    - O `ChatAgent` pode ser integrado com outros componentes do sistema, como bancos de dados para persistência de histórico
    - Pode ser estendido para incluir funcionalidades adicionais, como análise de sentimento ou detecção de intenção
+   - Para gerenciar múltiplos usuários e sessões, utilize o componente `ChatManager` que permite criar e gerenciar várias instâncias de `ChatAgent` com históricos isolados (veja a documentação do `ChatManager` para mais detalhes)
 
 ## Exemplo de Uso Completo
 
@@ -578,19 +579,15 @@ await chatAgent.setFact('preferencia_clima', 'quente');
    - Adicionar expiração de fatos baseada em tempo ou relevância
    - Desenvolver estratégias de resolução de conflitos para fatos contraditórios
 
-3. **Múltiplos Usuários**:
-   - Adaptar o agente para lidar com múltiplos usuários
-   - Manter históricos separados por usuário
-
-4. **Análise de Sentimento**:
+2. **Análise de Sentimento**:
    - Adicionar análise de sentimento para adaptar o tom das respostas
    - Detectar frustração ou satisfação do usuário
 
-5. **Integração com Interfaces**:
+3. **Integração com Interfaces**:
    - Conectar o agente a interfaces de chat (web, mobile, etc.)
    - Implementar webhooks para plataformas de mensageria
 
-6. **Aprimoramento da Delegação**:
+4. **Aprimoramento da Delegação**:
    - Implementar mecanismos de feedback para melhorar as decisões de delegação
    - Adicionar capacidade de delegação em cascata (especialistas delegando para sub-especialistas)
    - Desenvolver especialistas que mantêm seu próprio histórico interno
