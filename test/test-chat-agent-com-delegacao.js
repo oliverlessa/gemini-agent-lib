@@ -57,7 +57,7 @@ async function runTest() {
             llm: new VertexAILLM({
                 projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
                 credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-                modelName: "gemini-1.0-pro", // Usar um modelo mais leve para testes
+                modelName: "gemini-2.0-flash-001", // Usar um modelo mais leve para testes
                 mode: "chat"
             }),
             tools: [echoTool],

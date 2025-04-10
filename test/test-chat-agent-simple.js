@@ -13,7 +13,7 @@ async function testChatAgentSimple() {
     // Inicializa o LLM no modo chat
     const llm = new GenerativeAILLM({
         apiKey: process.env.GEMINI_API_KEY,
-        modelName: "gemini-1.0-pro",
+        modelName: "gemini-2.0-flash-001",
         mode: "chat", // Importante: o modo deve ser "chat"
         generationConfig: {
             maxOutputTokens: 2048,
