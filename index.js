@@ -3,6 +3,8 @@
 const Agent = require('./lib/agent');
 const ChatAgent = require('./lib/chat-agent');
 const ChatManager = require('./lib/chat-manager');
+const RoutingChatManager = require('./lib/routing-chat-manager');
+
 const GenerativeAILLM = require('./lib/generative-ai-llm');
 const VertexAILLM = require('./lib/vertex-ai-llm');
 const SequentialAgentChain = require('./lib/sequential-agent-chain');
@@ -29,12 +31,14 @@ const VertexAISearchRetrieverTool = require('./lib/tools/vertex-ai-search-retrie
 const WeatherTool = require('./lib/tools/weather-tool');
 const RestaurantTool = require('./lib/tools/restaurant-tool');
 const TemplateTool = require('./lib/tools/template-tool');
+const { request_specialist_sub_conversation, end_specialist_sub_conversation } = require('./lib/tools/subconversation-tools');
 
 module.exports = {
     // Componentes principais
     Agent,
     ChatAgent,
     ChatManager,
+    RoutingChatManager,
     GenerativeAILLM,
     VertexAILLM,
     SequentialAgentChain,
@@ -68,6 +72,11 @@ module.exports = {
         VertexAISearchRetrieverTool,
         WeatherTool,
         RestaurantTool,
-        TemplateTool
+        TemplateTool,
+        // Ferramentas de sub-conversa
+        SubConversation: {
+            request_specialist_sub_conversation,
+            end_specialist_sub_conversation
+        }
     }
 };
