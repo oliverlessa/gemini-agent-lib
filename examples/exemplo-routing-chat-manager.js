@@ -123,7 +123,7 @@ const memoryConfig = {
     conversation: {
         type: 'SQLiteConversationMemoryAdapter',
         dbConfig: { // Corrigido: usar dbPath
-            dbPath: './data/conversation_memory.db' // Corrigido: usar dbPath
+            dbPath: 'conversation_memory.db' // Corrigido: usar dbPath
         }
     }
 };
