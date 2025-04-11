@@ -7,7 +7,7 @@ Uma biblioteca Node.js para criar e orquestrar agentes de IA usando os modelos G
 ### A paritir do repositório NPM:
 
 ```bash
-npm install gemini-agent-lib
+npm install @oliverlessa/gemini-agent-lib
 ```
 
 ### A partir de um diretório/pasta local:
