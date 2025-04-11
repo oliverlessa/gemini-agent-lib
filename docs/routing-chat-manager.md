@@ -205,8 +205,7 @@ const coordinatorTools = [
 
 Parâmetros:
 - **specialist_role** (obrigatório): O 'role' (identificador) do agente especialista registrado.
-- **initial_context** (obrigatório): Contexto ou instrução inicial para o especialista.
-- **user_message_for_specialist** (obrigatório): A mensagem do usuário para o especialista processar primeiro.
+- **initial_context** (obrigatório): Contexto ou instrução inicial para o especialista. (A mensagem original do usuário que causou a delegação será passada automaticamente pelo sistema para o especialista).
 
 ### end_specialist_sub_conversation
 
