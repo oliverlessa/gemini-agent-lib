@@ -1,15 +1,16 @@
 # Hierarchical Agent Thinking Orchestrator
 
-O `HierarchicalAgentThinkingOrchestrator` é uma extensão do `HierarchicalAgentOrchestrator` que utiliza o modelo "thinking" para orquestrar agentes especialistas de forma mais eficiente.
+O `HierarchicalAgentThinkingOrchestrator` é uma extensão do `HierarchicalAgentOrchestrator` que utiliza o modelo "thinking" `gemini-2.5-pro-preview-03-25` para orquestrar agentes especialistas de forma mais eficiente.
 
 ## Visão Geral
 
-Este orquestrador permite a coordenação de múltiplos agentes especialistas, utilizando o modelo de "pensamento" (thinking) para melhorar a tomada de decisões e a distribuição de tarefas. Ele é especialmente útil para tarefas complexas que requerem diferentes tipos de expertise.
+Este orquestrador permite a coordenação de múltiplos agentes especialistas, utilizando o modelo de "pensamento" (thinking) para melhorar a tomada de decisões e a distribuição de tarefas. Ele é especialmente útil para tarefas complexas que requerem diferentes tipos de expertise. O modelo utilizado suporta function calling, permitindo o uso de ferramentas durante o processo de orquestração.
 
 ## Características
 
 - Orquestração hierárquica de agentes especialistas
-- Utiliza o modelo "thinking" para melhorar o processo de tomada de decisão
+- Utiliza o modelo "thinking" `gemini-2.5-pro-preview-03-25` para melhorar o processo de tomada de decisão
+- Suporte para function calling, permitindo o uso de ferramentas
 - Suporte para agentes com Google Search habilitado
 - Compatibilidade com modelos Gemini e Vertex AI
 - Capacidade de distribuir subtarefas específicas para agentes especialistas
@@ -127,11 +128,56 @@ O `HierarchicalAgentThinkingOrchestrator` é ideal para cenários como:
 
 O `HierarchicalAgentThinkingOrchestrator` se diferencia do `HierarchicalAgentOrchestrator` padrão por:
 
-1. Utilizar o modelo "thinking" para melhorar o processo de tomada de decisão
-2. Oferecer melhor integração com agentes que possuem Google Search habilitado
-3. Proporcionar uma distribuição de tarefas mais inteligente entre os agentes especialistas
-4. Melhorar a síntese dos resultados obtidos dos diferentes agentes
+1. Utilizar o modelo "thinking" `gemini-2.5-pro-preview-03-25` para melhorar o processo de tomada de decisão
+2. Suportar function calling, permitindo o uso de ferramentas durante a orquestração
+3. Oferecer melhor integração com agentes que possuem Google Search habilitado
+4. Proporcionar uma distribuição de tarefas mais inteligente entre os agentes especialistas
+5. Melhorar a síntese dos resultados obtidos dos diferentes agentes
 
 ## Exemplo Completo
 
 Para um exemplo completo de implementação, consulte o arquivo de teste [test-hierarchical-agent-thinking-orchestrator.js](../test/test-hierarchical-agent-thinking-orchestrator.js).
+
+## Uso como Ferramenta em Outros Agentes
+
+O `HierarchicalAgentThinkingOrchestrator` pode ser utilizado como uma ferramenta por outros agentes, como `ChatAgent` e `ThinkingAgent`. Isso permite que um agente principal delegue tarefas complexas para o orquestrador, que por sua vez coordenará múltiplos agentes especialistas.
+
+Para utilizar o `HierarchicalAgentThinkingOrchestrator` como uma ferramenta:
+
+1. Registre o orquestrador no `OrchestratorRegistry`
+2. Use a função `createOrchestratorTool` para transformá-lo em uma ferramenta
+3. Adicione a ferramenta ao agente principal
+
+```javascript
+// Registrar o orquestrador
+const orchestratorRegistry = new OrchestratorRegistry({
+    'hierarchical_thinking': {
+        type: 'HierarchicalAgentThinkingOrchestrator',
+        agents: [specialistAgent1, specialistAgent2],
+        llmConfig: llmConfig
+    }
+});
+
+// Criar a ferramenta
+const thinkingOrchestratorTool = createOrchestratorTool(
+    'hierarchical_thinking',
+    'solve_complex_problem',
+    'Resolve problemas complexos utilizando múltiplos agentes especialistas coordenados por um orquestrador hierárquico com capacidade de raciocínio passo a passo.',
+    {
+        type: FunctionDeclarationSchemaType.OBJECT,
+        properties: {
+            problem_description: { 
+                type: FunctionDeclarationSchemaType.STRING, 
+                description: "Descrição detalhada do problema a ser resolvido." 
+            }
+        },
+        required: ["problem_description"]
+    },
+    orchestratorRegistry
+);
+
+// Adicionar a ferramenta ao agente principal
+chatAgent.tools = [thinkingOrchestratorTool];
+```
+
+Para mais detalhes sobre como utilizar orquestradores como ferramentas, consulte a [documentação específica](./orchestrator-tool-factory.md).

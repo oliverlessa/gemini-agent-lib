@@ -151,6 +151,47 @@ console.log(resposta.text);
 // 5. Atualizar o histórico de conversa com todas as interações
 ```
 
+#### Uso com Orquestradores como Ferramentas
+
+O `ChatAgent` também pode utilizar orquestradores (como `SequentialAgentChain`, `HierarchicalAgentOrchestrator` e `AutoGenOrchestrator`) como ferramentas, permitindo delegar tarefas complexas para sistemas de orquestração especializados.
+
+```javascript
+// Importações necessárias
+const { createOrchestratorTool } = require('gemini-agent-lib/lib/orchestrator-tool-factory');
+const OrchestratorRegistry = require('gemini-agent-lib/lib/orchestrator-registry');
+
+// Configurar o OrchestratorRegistry
+const orchestratorRegistry = new OrchestratorRegistry({
+    'sequential_market_research': {
+        type: 'SequentialAgentChain',
+        agents: [marketAnalystAgent, reportGeneratorAgent]
+    }
+});
+
+// Criar a ferramenta de orquestração
+const marketResearchTool = createOrchestratorTool(
+    'sequential_market_research',
+    'perform_market_research',
+    'Executa uma pesquisa de mercado completa sobre um tópico específico.',
+    {
+        type: FunctionDeclarationSchemaType.OBJECT,
+        properties: {
+            research_topic: { 
+                type: FunctionDeclarationSchemaType.STRING, 
+                description: "O tópico principal da pesquisa de mercado." 
+            }
+        },
+        required: ["research_topic"]
+    },
+    orchestratorRegistry
+);
+
+// Adicionar a ferramenta ao ChatAgent
+chatAgent.tools = [weatherTool, marketResearchTool];
+```
+
+Para mais detalhes sobre como utilizar orquestradores como ferramentas, consulte a [documentação específica](./orchestrator-tool-factory.md).
+
 ### Gerenciamento de Histórico
 
 ```javascript

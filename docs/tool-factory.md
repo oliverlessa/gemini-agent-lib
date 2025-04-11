@@ -124,3 +124,7 @@ Para migrar uma tool existente para o padrão factory:
 ## Conclusão
 
 O padrão factory para tools oferece maior flexibilidade e reutilização de código, permitindo a criação de instâncias de tools com configurações personalizadas. Isso é especialmente útil para tools que precisam ser configuradas de maneira diferente para diferentes agentes ou casos de uso.
+
+## Veja Também
+
+- [Orquestradores como Ferramentas](./orchestrator-tool-factory.md): Documentação específica sobre como transformar orquestradores (SequentialAgentChain, HierarchicalAgentOrchestrator, AutoGenOrchestrator) em ferramentas que podem ser utilizadas por agentes como ChatAgent e ThinkingAgent.

@@ -2,11 +2,11 @@
 
 ## Visão Geral
 
-`ThinkingAgent` é uma classe especializada que herda da classe `Agent` e é configurada especificamente para utilizar o modelo `gemini-2.0-flash-thinking-exp-01-21`. Este modelo é projetado para fornecer respostas com raciocínio passo a passo, tornando-o ideal para tarefas que exigem pensamento estruturado e explicações detalhadas.
+`ThinkingAgent` é uma classe especializada que herda da classe `Agent` e é configurada especificamente para utilizar o modelo `gemini-2.5-pro-preview-03-25`. Este modelo é projetado para fornecer respostas com raciocínio passo a passo, tornando-o ideal para tarefas que exigem pensamento estruturado e explicações detalhadas. Além disso, suporta function calling, permitindo o uso de ferramentas.
 
 ## Características
 
-- **Modelo Especializado**: Utiliza o modelo `gemini-2.0-flash-thinking-exp-01-21` que é otimizado para raciocínio passo a passo.
+- **Modelo Especializado**: Utiliza o modelo `gemini-2.5-pro-preview-03-25` que é otimizado para raciocínio passo a passo e suporta function calling.
 - **Processamento Adaptativo**: Detecta automaticamente diferentes formatos de resposta (JSON, texto com marcadores, etc.).
 - **Flexibilidade de API**: Suporta tanto a API Gemini direta quanto a Vertex AI do Google Cloud.
 - **Integração com Orquestração**: Pode ser usado como um agente orquestrador em uma arquitetura hierárquica.
@@ -100,6 +100,58 @@ const orchestratorAgent = new ThinkingAgent({
 // ...
 ```
 
+## Uso com Orquestradores como Ferramentas
+
+O `ThinkingAgent` também pode utilizar orquestradores (como `SequentialAgentChain`, `HierarchicalAgentOrchestrator` e `AutoGenOrchestrator`) como ferramentas, permitindo delegar tarefas complexas para sistemas de orquestração especializados.
+
+```javascript
+// Importações necessárias
+const { createOrchestratorTool } = require('gemini-agent-lib/lib/orchestrator-tool-factory');
+const OrchestratorRegistry = require('gemini-agent-lib/lib/orchestrator-registry');
+
+// Configurar o OrchestratorRegistry
+const orchestratorRegistry = new OrchestratorRegistry({
+    'sequential_market_research': {
+        type: 'SequentialAgentChain',
+        agents: [marketAnalystAgent, reportGeneratorAgent]
+    }
+});
+
+// Criar a ferramenta de orquestração
+const marketResearchTool = createOrchestratorTool(
+    'sequential_market_research',
+    'perform_market_research',
+    'Executa uma pesquisa de mercado completa sobre um tópico específico.',
+    {
+        type: FunctionDeclarationSchemaType.OBJECT,
+        properties: {
+            research_topic: { 
+                type: FunctionDeclarationSchemaType.STRING, 
+                description: "O tópico principal da pesquisa de mercado." 
+            }
+        },
+        required: ["research_topic"]
+    },
+    orchestratorRegistry
+);
+
+// Criar o ThinkingAgent com a ferramenta de orquestração
+const thinkingAgent = new ThinkingAgent({
+    role: "Analista Estratégico",
+    objective: "Analisar solicitações e executar tarefas complexas, delegando quando necessário",
+    context: `Você é um Analista Estratégico. Sua função é analisar cuidadosamente a solicitação do usuário...`,
+    tools: [marketResearchTool],
+    apiKey: process.env.GEMINI_API_KEY,
+    useVertexAI: true
+});
+
+// Definir a tarefa e executar
+thinkingAgent.task = "Preciso de uma análise de mercado sobre baterias de estado sólido para veículos elétricos.";
+const response = await thinkingAgent.executeTask();
+```
+
+Para mais detalhes sobre como utilizar orquestradores como ferramentas, consulte a [documentação específica](./orchestrator-tool-factory.md).
+
 ## Formato de Resposta
 
 O método `processThinkingResponse()` tenta detectar diferentes formatos de resposta:
@@ -134,7 +186,8 @@ node test-thinking-agent-orchestration.js
 
 ## Limitações e Considerações
 
-- O modelo `gemini-2.0-flash-thinking-exp-01-21` é experimental e seu formato de resposta pode mudar.
+- O modelo `gemini-2.5-pro-preview-03-25` é uma versão preview e seu formato de resposta pode mudar.
+- Diferente do modelo anterior, este modelo suporta function calling, permitindo o uso de ferramentas.
 - A detecção de formato é adaptativa e pode precisar ser refinada com base nos resultados dos testes.
 - Para usar o `ThinkingAgent` com Vertex AI, é necessário ter as credenciais e configurações apropriadas do Google Cloud.
 
