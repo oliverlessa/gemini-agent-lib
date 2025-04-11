@@ -1,5 +1,5 @@
 {
-  "name": "gemini-agent-lib",
+  "name": "@oliverlessa/gemini-agent-lib",
   "version": "1.0.0",
   "description": "Uma biblioteca NodeJS para criar agentes de IA com Gemini LLM",
   "main": "index.js",
@@ -30,5 +30,11 @@
     "test": "node test/test-chat-agent.js",
     "test:all": "for file in test/*.js; do node \"$file\"; done"
   },
-  "type": "commonjs"
+  "type": "commonjs",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "lib": "lib",
+    "test": "test"
+  }
 }
