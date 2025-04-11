@@ -54,7 +54,7 @@ GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
 
 **⚠️ IMPORTANTE**: O arquivo `.env` é essencial para o funcionamento da biblioteca. Sem ele, você não conseguirá se conectar aos modelos de IA.
 
-Para uma explicação detalhada de cada variável e como obtê-las, consulte a [documentação de configuração](docs/configuracao.md).
+Para uma explicação detalhada de cada variável e como obtê-las, consulte a [documentação de configuração](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/configuracao.md).
 
 ## Uso Básico
 
@@ -93,20 +93,20 @@ console.log(resposta);
 
 ## Documentação
 
-Para documentação detalhada sobre cada componente, consulte a pasta [docs](docs):
+Para documentação detalhada sobre cada componente, consulte os links abaixo (apontando para o repositório GitHub):
 
-- [Chat Agent](docs/chat-agent.md)
-- [Thinking Agent](docs/thinking-agent.md)
-- [Sequential Agent Chain](docs/sequential-agent-chain.md)
-- [Hierarchical Agent Orchestrator](docs/hierarchical-agent-orchestrator.md)
-- [Hierarchical Agent Thinking Orchestrator](docs/hierarchical-agent-thinking-orchestrator.md)
-- [Auto Gen Orchestrator](docs/auto-gen-orchestrator.md)
-- [Vertex AI Search Retriever](docs/vertex-ai-search-retriever.md)
-- [Tool Factory](docs/tool-factory.md)
-- [Modo Chat Vertex AI](docs/modo-chat-vertex-ai.md)
-- [Formatadores Personalizados](docs/formatadores-personalizados.md)
-- [Dependências de Agentes](docs/dependencias-agentes.md)
-- [Sistema de Debug](docs/sistema-de-debug.md)
+- [Chat Agent](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/chat-agent.md)
+- [Thinking Agent](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/thinking-agent.md)
+- [Sequential Agent Chain](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/sequential-agent-chain.md)
+- [Hierarchical Agent Orchestrator](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/hierarchical-agent-orchestrator.md)
+- [Hierarchical Agent Thinking Orchestrator](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/hierarchical-agent-thinking-orchestrator.md)
+- [Auto Gen Orchestrator](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/auto-gen-orchestrator.md)
+- [Vertex AI Search Retriever](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/vertex-ai-search-retriever.md)
+- [Tool Factory](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/tool-factory.md)
+- [Modo Chat Vertex AI](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/modo-chat-vertex-ai.md)
+- [Formatadores Personalizados](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/formatadores-personalizados.md)
+- [Dependências de Agentes](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/dependencias-agentes.md)
+- [Sistema de Debug](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/sistema-de-debug.md)
 
 ## Debug e Logs
 
@@ -120,7 +120,7 @@ DEBUG=gemini-agent-lib:* node seu-script.js
 DEBUG=gemini-agent-lib:agent,gemini-agent-lib:chat-agent node seu-script.js
 ```
 
-Para mais detalhes, consulte a [documentação do sistema de debug](./docs/sistema-de-debug.md).
+Para mais detalhes, consulte a [documentação do sistema de debug](https://github.com/oliverlessa/gemini-agent-lib/blob/main/docs/sistema-de-debug.md).
 
 ## Exemplos
 
