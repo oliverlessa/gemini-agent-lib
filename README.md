@@ -96,6 +96,8 @@ console.log(resposta);
 Para documentação detalhada sobre cada componente, consulte os links abaixo (apontando para o repositório GitHub):
 
 - [Chat Agent](https://github.com/oliverlessa/gemini-agent-lib/blob/master/docs/chat-agent.md)
+- [Chat Manager](https://github.com/oliverlessa/gemini-agent-lib/blob/master/docs/chat-manager.md)
+- [Routing Chat Manager](https://github.com/oliverlessa/gemini-agent-lib/blob/master/docs/routing-chat-manager.md)
 - [Thinking Agent](https://github.com/oliverlessa/gemini-agent-lib/blob/master/docs/thinking-agent.md)
 - [Sequential Agent Chain](https://github.com/oliverlessa/gemini-agent-lib/blob/master/docs/sequential-agent-chain.md)
 - [Hierarchical Agent Orchestrator](https://github.com/oliverlessa/gemini-agent-lib/blob/master/docs/hierarchical-agent-orchestrator.md)
@@ -124,7 +126,7 @@ Para mais detalhes, consulte a [documentação do sistema de debug](https://gith
 
 ## Exemplos
 
-Veja exemplos de uso na pasta [examples](./examples).
+Veja exemplos de uso na pasta [examples](https://github.com/oliverlessa/gemini-agent-lib/tree/master/examples).
 
 ## Licença
 
