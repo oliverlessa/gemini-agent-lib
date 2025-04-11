@@ -228,6 +228,91 @@ Parâmetros:
 - **last_user_message** (obrigatório): A última mensagem do usuário que levou à conclusão.
 - **message_to_coordinator** (opcional): Mensagem final para o agente coordenador.
 
+## A Importância Crucial das Instruções (Contexto/Prompt) dos Agentes
+
+O sucesso e a robustez do `RoutingChatManager` dependem **fundamentalmente** da qualidade e precisão das instruções fornecidas no parâmetro `context` (prompt) tanto do agente coordenador quanto dos agentes especialistas. Essas instruções guiam o comportamento dos agentes, especialmente no uso correto das ferramentas de sinalização (`request_specialist_sub_conversation` e `end_specialist_sub_conversation`), garantindo que o fluxo da sub-conversa ocorra como esperado.
+
+Prompts mal definidos podem levar a comportamentos inesperados, como:
+- Falha na delegação para especialistas.
+- Anúncio indevido da transferência para o usuário.
+- Perda de contexto durante as transições.
+- Falha no retorno do controle para o coordenador.
+- Processamento incorreto dos resultados do especialista.
+
+É **obrigatório** que as instruções cubram os seguintes pontos:
+
+### Instruções para o Agente Coordenador
+
+O prompt do agente coordenador **deve** incluir instruções claras sobre:
+
+1.  **Identificação da Necessidade de Delegação:** Como e quando identificar que uma solicitação do usuário requer um especialista.
+2.  **Uso da Ferramenta `request_specialist_sub_conversation`:**
+    *   Instruir explicitamente o uso desta ferramenta para iniciar a delegação.
+    *   Especificar os papéis (`specialist_role`) dos especialistas disponíveis.
+    *   Exigir o fornecimento do `initial_context` relevante para o especialista.
+    *   **Crucial:** Instruir o agente a **NÃO** gerar nenhum texto de resposta ao usuário ao chamar esta ferramenta. A resposta deve conter *apenas* a chamada da ferramenta. O `RoutingChatManager` cuida da transição transparente.
+
+    *Exemplo de Instrução (baseado em `examples/exemplo-routing-chat-manager.js`):*
+    ```
+    INSTRUÇÕES PARA SUB-CONVERSAS (DELEGAÇÃO INTERNA):
+    - **NÃO anuncie ou pergunte ao usuário sobre a transferência para um especialista.** Apenas identifique a necessidade e use a ferramenta 'request_specialist_sub_conversation'. A transição deve ser invisível para o usuário.
+    - Ao usar 'request_specialist_sub_conversation', forneça os seguintes argumentos:
+      * `specialist_role`: O papel exato do especialista ('especialista_tecnico' ou 'especialista_financeiro').
+      * `initial_context`: Um breve resumo do que foi discutido até agora que seja relevante para o especialista iniciar o trabalho. (A mensagem do usuário será passada automaticamente pelo sistema).
+    - **IMPORTANTE:** Quando você decidir usar esta ferramenta, sua resposta deve conter **APENAS** a chamada da ferramenta. **NÃO GERE NENHUM TEXTO** explicando a transferência ou o motivo dela. O sistema cuidará da transição de forma invisível para o usuário.
+
+    ESPECIALISTAS DISPONÍVEIS (PARA SEU USO INTERNO):
+    - 'especialista_tecnico': Para questões técnicas complexas e suporte avançado.
+    - 'especialista_financeiro': Para questões financeiras, pagamentos e reembolsos.
+    ```
+
+3.  **Processamento do Retorno do Especialista:**
+    *   Instruir como interpretar a nota do sistema (`[SYSTEM_NOTE: ...]`) que contém o resultado da sub-conversa (`status`, `final_result`, `last_user_message`, `message_to_coordinator`).
+    *   Instruir a integrar o resultado do especialista de forma natural na resposta ao usuário, mantendo a fluidez da conversa.
+    *   Instruir como lidar com status específicos, como `out_of_scope`, potencialmente re-delegando para outro especialista se apropriado (novamente, sem anunciar a transferência).
+
+    *Exemplo de Instrução (baseado em `examples/exemplo-routing-chat-manager.js`):*
+    ```
+    - Quando receber de volta o controle com um resultado de especialista (através de uma nota do sistema ou contexto atualizado), analise cuidadosamente todas as informações.
+    - Integre essas informações na sua resposta ao usuário de forma natural, continuando a conversa como se você mesmo tivesse obtido a informação.
+    - **Cenário Especial - Retorno 'Fora de Escopo':** Se você receber uma mensagem do usuário acompanhada de uma nota do sistema indicando que o especialista anterior finalizou por estar 'fora de escopo' (`status: 'out_of_scope'`), analise a mensagem original do usuário. Se ela claramente pertence a outro especialista disponível (ex: 'especialista_financeiro'), use **imediatamente** a ferramenta `request_specialist_sub_conversation` para delegar a esse novo especialista. **NÃO FAÇA NENHUM COMENTÁRIO sobre a mudança de tópico ou a transferência.** Aja diretamente.
+    ```
+
+### Instruções para Agentes Especialistas
+
+O prompt de cada agente especialista **deve** incluir instruções claras sobre:
+
+1.  **Uso da Ferramenta `end_specialist_sub_conversation`:**
+    *   Instruir explicitamente o uso desta ferramenta para finalizar a sub-conversa e devolver o controle ao coordenador.
+    *   Especificar os parâmetros obrigatórios: `status`, `final_result`, `last_user_message`.
+    *   Explicar o propósito de `message_to_coordinator` (opcional).
+    *   **Crucial:** Enfatizar que o `final_result` deve conter os dados estruturados (JSON) e a resposta textual *conversacional* para o usuário (se houver) **NÃO** deve conter esses dados estruturados ou informações de depuração.
+
+    *Exemplo de Instrução (baseado em `examples/exemplo-routing-chat-manager.js`):*
+    ```
+    INSTRUÇÕES PARA FINALIZAR SUB-CONVERSA:
+    - Quando o problema for resolvido ou quando tiver coletado todas as informações necessárias para o coordenador continuar.
+    - Use a ferramenta 'end_specialist_sub_conversation'.
+    - Forneça os seguintes argumentos para a ferramenta:
+      * `status`: Um status claro ('completed', 'needs_followup', 'cannot_resolve', etc.).
+      * `final_result`: **APENAS AQUI** coloque um resultado estruturado (objeto JSON) com o diagnóstico, solução ou informações coletadas.
+      * `last_user_message`: A última mensagem do usuário que levou à conclusão desta sub-conversa.
+      * `message_to_coordinator`: Uma mensagem opcional para o coordenador com notas internas ou resumo.
+    - **IMPORTANTE:** Sua resposta textual final para o usuário (se houver) NÃO deve conter blocos JSON ou informações de depuração. Apenas texto conversacional claro. Os dados estruturados vão no argumento `final_result` da ferramenta.
+    ```
+
+2.  **Tratamento de Solicitações Fora de Escopo:**
+    *   Instruir o especialista a identificar rapidamente se a solicitação do usuário está fora de seu escopo.
+    *   Se estiver fora de escopo, instruir a usar **imediatamente** a ferramenta `end_specialist_sub_conversation` com um `status` apropriado (ex: `'out_of_scope'`) e incluir a `last_user_message`.
+    *   Instruir a **NÃO** tentar responder à solicitação fora de escopo.
+
+    *Exemplo de Instrução (baseado em `examples/exemplo-routing-chat-manager.js`):*
+    ```
+    - **Se a solicitação do usuário estiver claramente fora do seu escopo técnico (ex: perguntas sobre vendas, faturamento, etc.), use imediatamente a ferramenta 'end_specialist_sub_conversation' com status 'out_of_scope' e passe a mensagem do usuário em 'last_user_message'. Não tente responder à solicitação fora do escopo.**
+    ```
+
+Ao seguir estas diretrizes e fornecer prompts detalhados e precisos, você garantirá que o `RoutingChatManager` funcione de maneira eficiente e confiável, proporcionando uma experiência de usuário fluida mesmo com a complexidade das sub-conversas delegadas.
+
 ## Considerações Importantes
 
 1. **Contexto dos Agentes**: É crucial que tanto o coordenador quanto os especialistas tenham instruções claras em seus contextos sobre como e quando usar as ferramentas de sinalização.
