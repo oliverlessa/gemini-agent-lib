@@ -1,3 +1,7 @@
+## v1.0.9 (2025-04-12)
+
+*   Atualizando documentação (README) para informar sobre o sistema de memória
+
 ## v1.0.8 (2025-04-12)
 
 *   Atualizando documentação referente a GenerativeAILLM
