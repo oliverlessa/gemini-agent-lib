@@ -29,7 +29,7 @@ const { ChatAgent } = require('gemini-chain-lib');
 
 ## Arquitetura
 
-O `ChatAgent` utiliza a classe `VertexAILLM` configurada no modo "chat" para manter o estado da conversa. A arquitetura é composta por:
+O `ChatAgent` interage com uma instância de LLM (como `VertexAILLM` ou `GenerativeAILLM`) configurada no modo "chat" para manter o estado da conversa. A arquitetura é composta por:
 
 1. **Histórico de Conversa**: Array de objetos que armazenam cada mensagem com seu papel (role) e conteúdo
 2. **Processador de Mensagens**: Métodos para processar mensagens do usuário e gerar respostas
@@ -40,9 +40,17 @@ O `ChatAgent` utiliza a classe `VertexAILLM` configurada no modo "chat" para man
 
 ### Inicialização Básica
 
-O `ChatAgent` pode ser inicializado de duas maneiras: fornecendo uma instância de LLM personalizada ou deixando que o agente crie automaticamente uma instância padrão do `VertexAILLM`.
+O `ChatAgent` é flexível e pode ser inicializado de três maneiras principais:
 
-#### Inicialização com LLM personalizado
+1.  **Com uma instância LLM personalizada:** Você pode fornecer sua própria instância de um LLM compatível (como `VertexAILLM` ou `GenerativeAILLM`), garantindo que ela esteja configurada no modo `"chat"`.
+2.  **Com LLM padrão (automático):** Se nenhum LLM for fornecido, o agente criará automaticamente uma instância padrão do `VertexAILLM`.
+3.  **Com configuração de memória e/ou delegação:** Recursos adicionais como memória e delegação podem ser configurados na inicialização.
+
+#### 1. Inicialização com LLM Personalizado
+
+Você pode usar diferentes classes de LLM, como `VertexAILLM` ou `GenerativeAILLM`. É **crucial** que a instância LLM fornecida esteja configurada com `mode: "chat"`.
+
+**Exemplo com `VertexAILLM`:**
 
 ```javascript
 // Inicializa o LLM no modo chat
@@ -66,7 +74,33 @@ const chatAgent = new ChatAgent({
 });
 ```
 
-#### Inicialização com LLM padrão (automático)
+**Exemplo com `GenerativeAILLM`:**
+
+```javascript
+// Importa a classe GenerativeAILLM
+const { GenerativeAILLM } = require('gemini-agent-lib'); // Ajuste o caminho se necessário
+
+// Inicializa o GenerativeAILLM no modo chat
+const geminiLlm = new GenerativeAILLM({
+    apiKey: process.env.GEMINI_API_KEY, // Necessário para GenerativeAILLM
+    modelName: "gemini-1.5-flash-latest", // Ou outro modelo Gemini
+    mode: "chat", // Importante para ChatAgent
+    generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.2
+    }
+});
+
+// Cria uma instância do ChatAgent com o LLM GenerativeAI
+const chatAgentGemini = new ChatAgent({
+    role: "Assistente Gemini",
+    objective: "Conversar usando o modelo Gemini",
+    context: "Você é um assistente conversacional baseado no Gemini.",
+    llm: geminiLlm // Passa a instância do GenerativeAILLM
+});
+```
+
+#### 2. Inicialização com LLM Padrão (Automático)
 
 ```javascript
 // Cria uma instância do ChatAgent sem fornecer um LLM
@@ -93,7 +127,7 @@ const llm = new VertexAILLM({
 });
 ```
 
-> **Nota**: Para que a inicialização automática funcione, as variáveis de ambiente `GOOGLE_CLOUD_PROJECT_ID` e `GOOGLE_APPLICATION_CREDENTIALS` devem estar configuradas no ambiente.
+> **Nota**: A inicialização automática **sempre** cria uma instância do `VertexAILLM`. Para que funcione, as variáveis de ambiente `GOOGLE_CLOUD_PROJECT_ID` e `GOOGLE_APPLICATION_CREDENTIALS` devem estar configuradas. Se você pretende usar `GenerativeAILLM`, **deve** instanciá-lo manualmente e passá-lo no construtor, garantindo que a variável `GEMINI_API_KEY` esteja definida.
 
 ### Processamento de Mensagens
 
@@ -233,9 +267,10 @@ const resposta = await chatAgent.processUserMessage("Olá novamente!");
 ## Considerações Técnicas
 
 1. **Modo Chat do LLM**:
-   - O `ChatAgent` requer que o LLM esteja configurado no modo "chat"
-   - Um aviso é exibido se o LLM não estiver no modo correto
-   - Quando o LLM é instanciado automaticamente, ele já é configurado no modo "chat"
+   - O `ChatAgent` foi projetado para funcionar com LLMs configurados no modo `"chat"`. Esta configuração é essencial para que o agente gerencie corretamente o histórico de conversas internamente.
+   - Se você fornecer uma instância LLM que não tenha `mode: "chat"`, o `ChatAgent` exibirá um aviso (`console.warn`), pois o comportamento esperado do histórico pode não ser garantido.
+   - O LLM padrão (`VertexAILLM`), quando instanciado automaticamente, já é configurado no modo `"chat"`.
+   - Ao usar `GenerativeAILLM`, certifique-se de configurá-lo explicitamente com `mode: "chat"` ao criar a instância.
 
 2. **Gerenciamento de Memória**:
    - O histórico de conversa cresce a cada interação
