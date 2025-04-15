@@ -99,9 +99,10 @@ O construtor do `HierarchicalAgentThinkingOrchestrator` aceita dois parâmetros:
    - `apiKey`: Chave de API do Gemini
    - `useVertexAI`: Booleano indicando se deve usar Vertex AI
    - `vertexConfig`: Configurações para Vertex AI (se useVertexAI for true)
-     - `credentialsPath`: Caminho para o arquivo de credenciais
-     - `projectId`: ID do projeto Google Cloud
-     - `location`: Localização do Vertex AI (padrão: 'us-central1')
+      - `credentialsPath`: Caminho para o arquivo de credenciais
+      - `projectId`: ID do projeto Google Cloud
+      - `location`: Localização do Vertex AI (padrão: 'us-central1')
+   - `includeThinkingSteps` (opcional, booleano): Define se o resultado final deve incluir os passos de raciocínio do LLM. Padrão: `false` (retorna apenas a resposta final processada). Se `true`, retorna a resposta bruta completa do LLM, incluindo o raciocínio.
 
 ## Método Principal
 
@@ -111,8 +112,10 @@ Executa a orquestração dos agentes especialistas para resolver uma tarefa prin
 
 - **Parâmetros**:
   - `mainTask` (string): A tarefa principal a ser resolvida
-- **Retorno**:
-  - Promise que resolve para o resultado final da orquestração
+ - **Retorno**:
+   - Promise que resolve para uma string contendo:
+     - A resposta final processada (sem os passos de raciocínio), por padrão (`includeThinkingSteps: false`).
+     - A resposta bruta completa do LLM (incluindo os passos de raciocínio), se `includeThinkingSteps: true`.
 
 ## Casos de Uso
 

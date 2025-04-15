@@ -78,19 +78,41 @@ async function testHierarchicalAgentThinkingOrchestrator() {
                     credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
                     projectId: process.env.GOOGLE_CLOUD_PROJECT,
                     location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
-                }
+                },
+                // Teste 1: Comportamento padrão (includeThinkingSteps: false)
+                includeThinkingSteps: false 
             }
         );
-        
+
         // Executar a orquestração com uma tarefa principal
         const mainTask = "Investigar o potencial de mercado para um novo produto de IA para educação e fornecer uma análise abrangente e recomendações.";
-        console.log(`\n\n=== Iniciando orquestração para tarefa: "${mainTask}" ===`);
         
-        // Executar a orquestração e obter o resultado
-        const result = await orchestrator.orchestrate(mainTask);
-        
-        console.log("\n=== Resultado da Orquestração com Modelo Thinking ===");
-        console.log(result);
+        // --- Teste 1: Comportamento Padrão (Apenas Resposta Final) ---
+        console.log(`\n\n=== Iniciando orquestração (Padrão: Apenas Resposta Final) para tarefa: "${mainTask}" ===`);
+        const resultDefault = await orchestrator.orchestrate(mainTask);
+        console.log("\n=== Resultado da Orquestração (Padrão: Apenas Resposta Final) ===");
+        console.log(resultDefault);
+
+        // --- Teste 2: Incluindo Passos de Raciocínio ---
+        // Criar uma nova instância do orquestrador com includeThinkingSteps: true
+        const orchestratorWithThinking = new HierarchicalAgentThinkingOrchestrator(
+            specialistAgents, 
+            {
+                apiKey: process.env.GEMINI_API_KEY,
+                useVertexAI: process.env.USE_VERTEX_AI === 'true',
+                vertexConfig: {
+                    credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+                    projectId: process.env.GOOGLE_CLOUD_PROJECT,
+                    location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
+                },
+                includeThinkingSteps: true // Habilitar passos de raciocínio
+            }
+        );
+
+        console.log(`\n\n=== Iniciando orquestração (Com Raciocínio) para tarefa: "${mainTask}" ===`);
+        const resultWithThinking = await orchestratorWithThinking.orchestrate(mainTask);
+        console.log("\n=== Resultado da Orquestração (Com Raciocínio) ===");
+        console.log(resultWithThinking);
         
     } catch (error) {
         console.error("Erro ao executar o teste de orquestração com modelo thinking:", error);
