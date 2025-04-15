@@ -1,6 +1,6 @@
 {
   "name": "@oliverlessa/gemini-agent-lib",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Uma biblioteca NodeJS para criar agentes de IA com Gemini LLM",
   "main": "index.js",
   "author": "Oliver Lessa",
