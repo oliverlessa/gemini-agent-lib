@@ -1,6 +1,6 @@
 # GeminiAgentLib
 
-Uma biblioteca Node.js poderosa e flexível para construir, gerenciar e orquestrar agentes de Inteligência Artificial. Integre facilmente os modelos Gemini do Google (incluindo Generative AI e Vertex AI) em suas aplicações, criando desde assistentes simples até sistemas multi-agentes complexos com memória e ferramentas personalizadas.
+Uma biblioteca Node.js flexível para construir, gerenciar e orquestrar agentes de Inteligência Artificial. Integre facilmente os modelos Gemini do Google (incluindo Generative AI e Vertex AI) em suas aplicações, criando desde assistentes simples até sistemas multi-agentes complexos com memória e ferramentas personalizadas.
 
 ## Instalação
 
