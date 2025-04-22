@@ -35,7 +35,7 @@ async function testVertexAISearchRetriever() {
             credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
-            modelName: "gemini-1.0-pro",
+            modelName: "gemini-2.0-flash-001",
             mode: "oneshot",
             generationConfig: {
                 maxOutputTokens: 8192,
@@ -65,7 +65,8 @@ async function testVertexAISearchRetriever() {
             location: "global",
             dataStoreId: "site-fainor_1714866492522",
             maxResults: 5,
-            description: "Ferramenta especializada para buscar informações sobre a Fainor no Vertex AI Search"
+            name: "search_private_knowledge_base",
+            description: "Ferramenta especializada para buscar informações sobre a Fainor no search_private_knowledge_base"
         });
         console.log("3. Instância criada com descrição personalizada");
         
@@ -80,14 +81,14 @@ async function testVertexAISearchRetriever() {
         // Criar o agente com a ferramenta VertexAISearchRetriever personalizada
         const agente = new Agent({
             role: "Assistente de Pesquisa",
-            objective: "Fornecer informações precisas usando o Vertex AI Search",
-            context: `Você é um assistente de IA avançado com acesso ao Vertex AI Search.
-                     SEMPRE use a ferramenta search_private_knowledge_base para buscar informações relevantes antes de responder.
-                     Se a busca não retornar resultados, informe isso claramente ao usuário.
-                     Retorne os snippets e títulos das páginas de resultados.
+             objective: "Fornecer informações precisas usando o Vertex AI Search",
+             context: `Você é um assistente de IA que SÓ PODE responder usando informações obtidas pela ferramenta search_private_knowledge_base.
+                      É OBRIGATÓRIO usar a ferramenta search_private_knowledge_base para QUALQUER pergunta. NÃO use conhecimento prévio.
+                      Se a busca não retornar resultados, informe APENAS que a busca não retornou resultados.
+                      Retorne os snippets e títulos das páginas de resultados da busca.
                      Liste todas as fontes de informação encontradas. Liste em quais documentos as informações foram encontradas.
                      Forneça respostas completas e precisas baseadas nas informações encontradas.
-                     Não acresente nenhuma informação que não esteja nos resultados da busca.`,
+                     Não acresente nenhuma informação que não esteja nos resultados da busca da search_private_knowledge_base.`,
             task: "", // Será definida abaixo
             llm: vertexLLM,
             tools: [customDescriptionTool] // Usando a instância com descrição personalizada
@@ -95,7 +96,7 @@ async function testVertexAISearchRetriever() {
         
         // Definir tarefas para testar a ferramenta
         const tarefas = [
-            "Busque informações sobre vestibular na Fainor incluindo como e quando fazer e como se inscrever"
+            'Como faço o vestibular?',
         ];
         
         // Executar cada tarefa
