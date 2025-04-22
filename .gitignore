@@ -38,5 +38,6 @@ lerna-debug.log*
 
 gcp*.json
 plan*
+dev-plan*
 *.db
 /data
