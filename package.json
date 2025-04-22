@@ -5,6 +5,10 @@
   "main": "index.js",
   "author": "Oliver Lessa",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oliverlessa/gemini-agent-lib.git"
+  },
   "keywords": [
     "ai",
     "agents",
