@@ -1,3 +1,7 @@
+## v1.0.12 (2025-04-22)
+
+*   Corrigindo forma de localização dos resultados da busca na Vertex AI Search.
+
 ## v1.0.10 (2025-04-22)
 
 *   Adicionando repository no package.json
