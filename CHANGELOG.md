@@ -1,3 +1,7 @@
+## v1.0.10 (2025-04-22)
+
+*   Adicionando repository no package.json
+
 ## v1.0.10 (2025-04-15)
 
 *   Novo parâmetro `includeThinkingSteps` em HierarchicalAgentThinkingOrchestrator. Define se o resultado final deve incluir os passos de raciocínio do LLM
