@@ -23,8 +23,16 @@ const FactMemory = require('./lib/memory/fact-memory');
 const SQLiteFactMemoryAdapter = require('./lib/memory/sqlite-fact-memory-adapter');
 const MongoDBFactMemoryAdapter = require('./lib/memory/mongodb-fact-memory-adapter');
 const SummaryMemory = require('./lib/memory/summary-memory');
-const SQLiteSummaryMemoryAdapter = require('./lib/memory/sqlite-summary-memory-adapter');
+const SQLiteSummaryMemoryAdapter = require('./lib/memory/sqlite-summary-memory-adapter'); // Adicionar require faltante
 const MongoDBSummaryMemoryAdapter = require('./lib/memory/mongodb-summary-memory-adapter');
+const SemanticMemory = require('./lib/memory/semantic-memory'); // Interface base
+const ChromaDBMemoryAdapter = require('./lib/memory/chromadb-semantic-memory-adapter'); // Adaptador ChromaDB
+
+// Componentes de Embedding
+const VertexAIEmbeddingFunction = require('./lib/embedding/vertex-ai-embedding');
+
+// Loaders
+const TextLoader = require('./lib/loaders/text-loader');
 
 // Exportar ferramentas específicas
 const VertexAISearchRetrieverTool = require('./lib/tools/vertex-ai-search-retriever-tool');
@@ -78,5 +86,19 @@ module.exports = {
             request_specialist_sub_conversation,
             end_specialist_sub_conversation
         }
+    },
+
+    // Componentes de Embedding (novo)
+    embedding: {
+        VertexAIEmbeddingFunction
+    },
+
+    // Loaders (novo)
+    loaders: {
+        TextLoader
     }
 };
+
+// Adicionar adaptadores de memória semântica ao objeto 'memory' exportado
+module.exports.memory.SemanticMemory = SemanticMemory; // Exporta a interface base
+module.exports.memory.ChromaDBMemoryAdapter = ChromaDBMemoryAdapter; // Exporta o adaptador

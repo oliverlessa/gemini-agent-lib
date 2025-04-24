@@ -19,9 +19,11 @@
     "function-calling"
   ],
   "dependencies": {
+    "@google-cloud/aiplatform": "^4.1.0",
     "@google-cloud/discoveryengine": "^2.0.0",
     "@google-cloud/vertexai": "^1.9.3",
     "@google/generative-ai": "^0.23.0",
+    "chromadb": "^2.2.1",
     "debug": "^4.4.0",
     "dotenv": "^16.4.7",
     "mongodb": "^6.15.0",
