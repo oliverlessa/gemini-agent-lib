@@ -4,13 +4,33 @@ Este documento descreve o sistema de memória implementado para o `ChatAgent` na
 
 ## Visão Geral
 
-O sistema de memória é composto por três interfaces principais, cada uma com adaptadores para diferentes bancos de dados:
+O sistema de memória é composto por quatro interfaces principais, cada uma com adaptadores para diferentes soluções de armazenamento:
 
-1. **ConversationMemory**: Armazena o histórico sequencial de mensagens da conversa (memória episódica).
-2. **FactMemory**: Armazena fatos discretos, preferências ou pares chave-valor associados a um contexto (memória semântica/perfil).
-3. **SummaryMemory**: Armazena resumos de segmentos de conversa (memória resumida).
+1.  **ConversationMemory**: Armazena o histórico sequencial de mensagens da conversa (memória episódica).
+2.  **FactMemory**: Armazena fatos discretos ou pares chave-valor associados a um contexto (ex: preferências do usuário).
+3.  **SummaryMemory**: Armazena resumos de segmentos de conversa (memória resumida).
+4.  **SemanticMemory**: Armazena e recupera informações com base no significado (semântica), utilizando embeddings vetoriais. Essencial para RAG.
 
-Cada interface possui adaptadores para SQLite e MongoDB, permitindo escolher a solução de persistência mais adequada para cada caso de uso.
+Adaptadores estão disponíveis para SQLite, MongoDB e ChromaDB (para SemanticMemory), permitindo escolher a solução de persistência mais adequada.
+
+## RAG (Retrieval-Augmented Generation) e Memória Semântica
+
+Uma das aplicações mais poderosas da memória em agentes de IA é a implementação de **RAG (Retrieval-Augmented Generation)**.
+
+**O que é RAG?**
+RAG é uma técnica onde um modelo de linguagem grande (LLM), antes de gerar uma resposta, primeiro recupera informações relevantes de uma base de conhecimento externa. Essas informações recuperadas são então fornecidas ao LLM como contexto adicional, permitindo que ele gere respostas mais informadas, precisas e contextualizadas.
+
+**Como a Memória Semântica se encaixa?**
+A `SemanticMemory` atua como essa base de conhecimento externa. Ela armazena informações (documentos, trechos de texto, etc.) como vetores de embedding em um banco de dados vetorial (como o ChromaDB). Quando o agente precisa responder a uma pergunta ou executar uma tarefa, ele primeiro consulta a `SemanticMemory` usando a pergunta ou o contexto atual (também convertidos em embeddings). A memória retorna os trechos de informação mais semanticamente similares, que são então usados pelo LLM para "aumentar" sua geração de resposta.
+
+**Benefícios do RAG com Memória Semântica:**
+
+-   **Memória de Longo Prazo:** Permite que o agente "lembre" de grandes volumes de informação de documentos carregados ou interações passadas, superando as limitações da janela de contexto do LLM.
+-   **Grounding e Redução de Alucinações:** Baseia as respostas do LLM em fatos e dados concretos recuperados da memória, tornando as respostas mais confiáveis e menos propensas a inventar informações.
+-   **Conhecimento Específico de Domínio:** Permite que o agente acesse e utilize conhecimento especializado que não estava presente em seus dados de treinamento originais.
+-   **Atualização de Conhecimento:** A base de conhecimento pode ser atualizada independentemente do LLM, permitindo que o agente se mantenha atualizado com novas informações.
+-   **Aprendizagem/Aprimoramento Contextual:** O agente pode usar o conteúdo recuperado para refinar suas respostas e "aprender" com as informações disponíveis na memória semântica.
+-   **Contextualização:** Fornece contexto altamente relevante para tarefas ou perguntas específicas.
 
 ## Características Principais
 
@@ -34,7 +54,7 @@ Métodos principais:
 
 ### FactMemory
 
-Responsável por armazenar fatos discretos (pares chave-valor) associados a um contexto. Útil para armazenar preferências do usuário, informações aprendidas durante a conversa, etc.
+Responsável por armazenar fatos discretos (pares chave-valor) associados a um contexto específico (geralmente um `chatId`). Útil para armazenar preferências do usuário, estado da sessão ou informações pontuais aprendidas durante a conversa. Diferente da `SemanticMemory`, a recuperação é feita por chave exata, não por similaridade semântica.
 
 Métodos principais:
 - `setFact(contextId, key, value)`: Armazena ou atualiza um fato.
@@ -45,7 +65,7 @@ Métodos principais:
 
 ### SummaryMemory
 
-Responsável por armazenar resumos de segmentos da conversa. Útil para manter o contexto em conversas longas sem precisar processar todo o histórico.
+Responsável por armazenar resumos de segmentos da conversa. Útil para manter o contexto em conversas longas sem precisar processar todo o histórico, comprimindo informações passadas.
 
 Métodos principais:
 - `addSummary(contextId, summaryContent, timestamp)`: Adiciona um novo resumo.
@@ -53,9 +73,20 @@ Métodos principais:
 - `getAllSummaries(contextId, limit)`: Recupera todos os resumos, ordenados do mais recente para o mais antigo.
 - `deleteAllSummaries(contextId)`: Remove todos os resumos para um contexto.
 
+### SemanticMemory (NOVO)
+
+Responsável por armazenar e recuperar documentos ou trechos de texto com base na similaridade semântica. Utiliza embeddings vetoriais para representar o significado do texto e bancos de dados vetoriais para busca eficiente. É a base para implementações RAG.
+
+Métodos principais:
+- `init()`: Inicializa a conexão com o backend de memória (ex: ChromaDB).
+- `add(documents)`: Adiciona uma lista de documentos à memória. Cada documento geralmente tem `id`, `content` e `metadata`. A função de embedding configurada gera os vetores.
+- `search(query, k, filter)`: Busca os `k` documentos mais similares à `query` fornecida, opcionalmente aplicando um `filter` nos metadados.
+- `delete(ids)`: Remove documentos da memória pelos seus IDs.
+- `close()`: Fecha a conexão com o backend.
+
 ## Adaptadores Disponíveis
 
-### SQLite
+### SQLite (Conversation, Fact, Summary)
 
 Adaptadores para armazenamento local em arquivo SQLite:
 - `SQLiteConversationMemoryAdapter`
@@ -74,7 +105,7 @@ const conversationMemory = new memory.SQLiteConversationMemoryAdapter({
 });
 ```
 
-### MongoDB
+### MongoDB (Conversation, Fact, Summary)
 
 Adaptadores para armazenamento em banco de dados MongoDB:
 - `MongoDBConversationMemoryAdapter`
@@ -102,7 +133,77 @@ await conversationMemory.initialize();
 // Agora o adaptador está pronto para uso
 ```
 
-## Gerenciamento Automático de Memórias
+### ChromaDB (SemanticMemory)
+
+Adaptador para usar o ChromaDB como backend para a `SemanticMemory`.
+
+-   `ChromaDBMemoryAdapter`
+
+**Importante:** Requer a instalação do pacote `chromadb`: `npm install chromadb`.
+
+**Configuração:**
+
+```javascript
+const { memory } = require('gemini-agent-lib');
+const VertexAIEmbeddingFunction = require('../lib/embedding/vertex-ai-embedding'); // Exemplo com Vertex AI
+const { GoogleGenerativeAiEmbeddingFunction } = require('chromadb'); // Exemplo com Google Gemini (via ChromaDB)
+
+// --- Opção 1: Usando VertexAIEmbeddingFunction (customizada) ---
+const vertexAIEmbedder = new VertexAIEmbeddingFunction({
+    projectId: process.env.VERTEX_PROJECT_ID,
+    location: process.env.VERTEX_LOCATION,
+    modelId: process.env.VERTEX_EMBEDDING_MODEL_ID || 'text-embedding-005',
+});
+
+const semanticMemoryVertex = new memory.ChromaDBMemoryAdapter({
+    collectionName: "minha_colecao_vertex",
+    embeddingFunction: vertexAIEmbedder, // Passa a instância
+    // path: "http://localhost:8000" // Opcional: para servidor ChromaDB externo
+});
+
+// --- Opção 2: Usando GoogleGenerativeAiEmbeddingFunction (do ChromaDB) ---
+const googleEmbedder = new GoogleGenerativeAiEmbeddingFunction({
+    googleApiKey: process.env.GEMINI_API_KEY, // Ou outra chave API do Google
+    // model: "embedding-001" // Opcional
+});
+
+const semanticMemoryGoogle = new memory.ChromaDBMemoryAdapter({
+    collectionName: "minha_colecao_google",
+    embeddingFunction: googleEmbedder, // Passa a instância
+    // path: "http://localhost:8000" // Opcional
+});
+
+// Inicializar a memória semântica escolhida (importante!)
+// await semanticMemoryVertex.init();
+// ou
+// await semanticMemoryGoogle.init();
+
+// Agora o adaptador está pronto para adicionar e buscar documentos.
+// Exemplo de adição:
+// await semanticMemoryVertex.add([
+//   { id: "doc1", content: "Conteúdo do primeiro documento.", metadata: { tipo: "manual" } },
+//   { id: "doc2", content: "Informações sobre o segundo item.", metadata: { tipo: "faq" } }
+// ]);
+
+// Exemplo de busca:
+// const resultados = await semanticMemoryVertex.search("Qual a informação sobre o segundo item?", 2);
+// console.log(resultados);
+
+// Fechar a conexão quando terminar
+// await semanticMemoryVertex.close();
+```
+
+**Flexibilidade da `embeddingFunction`:**
+
+O `ChromaDBMemoryAdapter` foi projetado para ser flexível com a função de embedding fornecida:
+
+1.  **Se** a `embeddingFunction` possuir um método `generate(texts: string[])`, ela será usada diretamente (padrão esperado pelo `chromadb`). É o caso da `GoogleGenerativeAiEmbeddingFunction` do pacote `chromadb`.
+2.  **Se** a `embeddingFunction` possuir um método `embedDocuments(texts: string[])` (como a nossa `VertexAIEmbeddingFunction`), o adaptador criará automaticamente um wrapper para compatibilidade com o ChromaDB.
+3.  Se nenhum desses métodos for encontrado, um erro será lançado durante a construção do adaptador.
+
+Para um exemplo completo de uso do `ChromaDBMemoryAdapter` com ambas as funções de embedding, veja: `examples/exemplo-chromadb-multi-embedding.js`.
+
+## Gerenciamento Automático de Memórias (Fact e Summary)
 
 O `ChatAgent` agora suporta o gerenciamento automático de memórias de fatos e resumos. Esta funcionalidade permite que o agente analise automaticamente as conversas e:
 
@@ -185,7 +286,9 @@ Isso proporciona flexibilidade para combinar a extração automática com a adi�
 
 ## Uso com ChatAgent
 
-### Configuração Básica com SQLite
+O `ChatAgent` pode ser configurado para usar qualquer combinação dos adaptadores de memória.
+
+### Configuração Básica com SQLite (ConversationMemory)
 
 ```javascript
 const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
@@ -212,7 +315,7 @@ console.log(resposta.text);
 await conversationMemory.close();
 ```
 
-### Configuração com MongoDB
+### Configuração com MongoDB (Todos os Tipos Exceto Semântica)
 
 ```javascript
 const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
@@ -279,7 +382,7 @@ await factMemory.close();
 await summaryMemory.close();
 ```
 
-### Uso Completo (Todos os Tipos de Memória)
+### Uso Completo com SQLite (Conversation, Fact, Summary)
 
 ```javascript
 const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
@@ -331,6 +434,81 @@ console.log(`Resumo: ${resumo}`);
 await conversationMemory.close();
 await factMemory.close();
 await summaryMemory.close();
+```
+
+### Uso com Memória Semântica (ChromaDB)
+
+Atualmente, a `SemanticMemory` não é integrada diretamente ao fluxo automático do `ChatAgent` da mesma forma que `ConversationMemory`, `FactMemory` e `SummaryMemory`. Ela é projetada para ser usada programaticamente para implementar lógicas RAG específicas, como:
+
+1.  **Carregar Documentos:** Usar um script separado ou uma ferramenta para popular a `SemanticMemory` com sua base de conhecimento (ex: usando `TextLoader` e `semanticMemory.add()`).
+2.  **Recuperação Explícita:** Dentro da lógica do seu agente ou aplicação, antes de chamar o LLM, fazer uma busca na `SemanticMemory` com base na pergunta do usuário ou no contexto atual.
+3.  **Injeção de Contexto:** Incluir os resultados da busca da `SemanticMemory` no prompt enviado ao LLM.
+
+```javascript
+// Exemplo conceitual de integração RAG com ChatAgent
+
+const { ChatAgent, VertexAILLM, memory } = require('gemini-agent-lib');
+const VertexAIEmbeddingFunction = require('../lib/embedding/vertex-ai-embedding');
+
+// Configurar LLM
+const llm = new VertexAILLM({ /* ... */ });
+
+// Configurar Memória Semântica
+const vertexAIEmbedder = new VertexAIEmbeddingFunction({ /* ... */ });
+const semanticMemory = new memory.ChromaDBMemoryAdapter({
+    collectionName: "knowledge_base",
+    embeddingFunction: vertexAIEmbedder
+});
+await semanticMemory.init(); // Inicializar
+
+// (Assumindo que a memória já foi populada com documentos relevantes)
+
+// Criar ChatAgent (pode ter outras memórias também)
+const chatAgent = new ChatAgent({
+    role: "Assistente Especialista",
+    objective: "Responder perguntas usando a base de conhecimento",
+    context: "Você responde perguntas consultando informações relevantes.",
+    llm: llm,
+    // conversationMemory: ..., // Opcional
+});
+
+// Função para processar mensagem com RAG
+async function processarComRAG(perguntaUsuario) {
+    // 1. Buscar na Memória Semântica
+    const K = 3; // Número de documentos a recuperar
+    const resultadosBusca = await semanticMemory.search(perguntaUsuario, K);
+
+    // 2. Preparar o contexto recuperado
+    let contextoRecuperado = "Informações relevantes encontradas:\n";
+    if (resultadosBusca && resultadosBusca.length > 0) {
+        contextoRecuperado += resultadosBusca.map(r => `- ${r.content}`).join("\n");
+    } else {
+        contextoRecuperado = "Nenhuma informação diretamente relevante encontrada na base de conhecimento.";
+    }
+
+    // 3. Criar prompt aumentado
+    const promptAumentado = `Contexto:\n${contextoRecuperado}\n\nPergunta do Usuário: ${perguntaUsuario}\n\nResposta:`;
+
+    // 4. Chamar o LLM diretamente ou através de um método do agente que permita prompt customizado
+    // (Nota: ChatAgent pode precisar de adaptação ou usar LLM diretamente para este fluxo)
+    // Exemplo usando LLM diretamente:
+    const respostaLLM = await llm.generateContent(promptAumentado);
+
+    // 5. Registrar a interação (opcional, se usar ConversationMemory)
+    // await chatAgent.appendHistory('user', perguntaUsuario);
+    // await chatAgent.appendHistory('model', respostaLLM);
+
+    return respostaLLM;
+}
+
+// Exemplo de uso
+const pergunta = "Qual o procedimento para solicitar férias?";
+const respostaFinal = await processarComRAG(pergunta);
+console.log("Resposta do Agente:", respostaFinal);
+
+// Fechar conexão da memória semântica
+await semanticMemory.close();
+
 ```
 
 ### Uso sem Memória Persistente
@@ -386,7 +564,7 @@ await conversationMemory.close();
 
 ## Considerações Importantes
 
-1. **IDs de Conversa**: Quando qualquer tipo de memória persistente é configurado, o `ChatAgent` gera automaticamente um ID único (`chatId`) para a conversa, que é usado para associar as informações armazenadas. Opcionalmente, o usuário pode fornecer seu próprio `chatId` ao instanciar o `ChatAgent` (passando-o no objeto de configuração), permitindo maior controle sobre a associação de dados.
+1. **IDs de Conversa (`chatId`)**: Para `ConversationMemory`, `FactMemory` e `SummaryMemory`, o `ChatAgent` associa os dados a um `chatId`. Se não for fornecido na configuração do agente, um UUID é gerado automaticamente. Fornecer um `chatId` explícito (ex: ID de usuário, ID de sessão) permite recuperar o estado da memória entre diferentes instâncias ou execuções. A `SemanticMemory` geralmente opera em um escopo mais amplo (ex: uma base de conhecimento inteira), mas pode usar metadados e filtros para segmentar informações se necessário.
 
 2. **Inicialização de Adaptadores MongoDB**: Os adaptadores MongoDB (`MongoDBConversationMemoryAdapter`, `MongoDBFactMemoryAdapter`, `MongoDBSummaryMemoryAdapter`) requerem inicialização explícita antes de serem utilizados. Você deve chamar o método `initialize()` e aguardar sua conclusão antes de criar o ChatAgent ou usar os adaptadores diretamente. Isso é necessário porque a conexão com o MongoDB é assíncrona e precisa ser estabelecida antes que qualquer operação seja realizada.
 
@@ -694,6 +872,8 @@ Veja exemplos completos de uso do sistema de memória nos arquivos:
 - `examples/exemplo-chat-agent-com-memoria-parcial.js`: Uso com apenas um tipo de memória.
 - `examples/exemplo-chat-agent-sem-memoria.js`: Uso sem memória persistente.
 - `examples/exemplo-chat-agent-com-memoria-automatica.js`: Uso com gerenciamento automático de memórias de fatos e resumos.
+- `examples/exemplo-chromadb-multi-embedding.js`: Demonstra o uso do `ChromaDBMemoryAdapter` com diferentes funções de embedding.
+- `examples/exemplo-ingestao-semantic-memory.js`: Mostra como popular a `SemanticMemory` (ChromaDB) a partir de arquivos de texto.
 
 ## Testes
 

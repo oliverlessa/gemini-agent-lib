@@ -90,7 +90,7 @@ console.log(resposta);
 - **HierarchicalAgentOrchestrator**: Orquestra múltiplos agentes de forma hierárquica
 - **AutoGenOrchestrator**: Orquestra autonomamente múltiplos agentes para resolver tarefas complexas (requer Vertex AI)
 - **ToolBuilder**: Facilita a criação de ferramentas para os agentes
-- **Sistema de Memória**: Permite persistir histórico, fatos e resumos das conversas (SQLite, MongoDB)
+- **Sistema de Memória**: Inclui memória de conversação, fatos e **Memória Semântica** (com adaptador `ChromaDBMemoryAdapter` flexível para diferentes embeddings, além de SQLite e MongoDB). Essencial para **RAG (Retrieval-Augmented Generation)**, permitindo que agentes acessem conhecimento externo e possuam memória de longo prazo.
 
 ## Documentação
 
