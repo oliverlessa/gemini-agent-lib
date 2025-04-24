@@ -1,3 +1,12 @@
+## v1.1.0 (2025-04-22)
+
+*   Adicionada `SemanticMemory` (RAG) como memória e Tool
+*   Adaptador `ChromaDBMemoryAdapter` para `SemanticMemory`
+*   Multiplas funções de embeddings disponíveis para `SemanticMemory`
+*   Documentação do uso de `SemanticMemory` como memória e como ferramenta
+*   Definindo `gemini-2.0-flash-001` como modelo padão quando não for especificado
+*   Correções variadas em exemplos e documentação
+
 ## v1.0.12 (2025-04-22)
 
 *   Corrigindo forma de localização dos resultados da busca na Vertex AI Search.
