@@ -73,7 +73,7 @@ Métodos principais:
 - `getAllSummaries(contextId, limit)`: Recupera todos os resumos, ordenados do mais recente para o mais antigo.
 - `deleteAllSummaries(contextId)`: Remove todos os resumos para um contexto.
 
-### SemanticMemory (NOVO)
+### SemanticMemory
 
 Responsável por armazenar e recuperar documentos ou trechos de texto com base na similaridade semântica. Utiliza embeddings vetoriais para representar o significado do texto e bancos de dados vetoriais para busca eficiente. É a base para implementações RAG.
 
