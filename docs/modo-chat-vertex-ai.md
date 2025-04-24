@@ -41,7 +41,7 @@ A classe agora mantém o estado interno do chat, armazenando:
 const llm = new VertexAILLM({
     projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
     credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    modelName: "gemini-1.0-pro",
+    modelName: "gemini-2.0-flash-001",
     mode: "chat",
     generationConfig: {
         maxOutputTokens: 2048,

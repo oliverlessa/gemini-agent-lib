@@ -17,7 +17,7 @@ async function testVertexFunctionCalling() {
             credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
             projectId: process.env.VERTEX_PROJECT_ID,
             location: process.env.VERTEX_LOCATION || "us-central1",
-            modelName: "gemini-1.0-pro", // ou outro modelo que suporte function calling
+            modelName: "gemini-2.0-flash-001", // ou outro modelo que suporte function calling
             mode: "oneshot" // ou "chat" para testar em modo de chat
         });
         

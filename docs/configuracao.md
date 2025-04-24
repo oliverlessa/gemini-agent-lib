@@ -47,7 +47,7 @@ GOOGLE_APPLICATION_CREDENTIALS=./caminho_para_arquivo_credenciais.json
 
 ### GEMINI_API_KEY
 **Descrição**: Sua chave de API pessoal para acessar os modelos Generative AI do Google (Gemini).  
-**Obrigatoriedade**: Essencial para interagir com modelos como `gemini-1.0-pro`.  
+**Obrigatoriedade**: Essencial para interagir com modelos como `gemini-2.0-flash-001`.  
 **Como obter**: Acesse o [Google AI Studio](https://aistudio.google.com/app/apikey), crie uma conta se necessário, e gere uma chave de API.
 
 ### VERTEX_API_KEY
