@@ -40,6 +40,7 @@ const WeatherTool = require('./lib/tools/weather-tool');
 const RestaurantTool = require('./lib/tools/restaurant-tool');
 const TemplateTool = require('./lib/tools/template-tool');
 const { request_specialist_sub_conversation, end_specialist_sub_conversation } = require('./lib/tools/subconversation-tools');
+const SemanticMemoryTool = require('./lib/tools/semantic-memory-tool'); // Importar a nova ferramenta
 
 module.exports = {
     // Componentes principais
@@ -85,7 +86,9 @@ module.exports = {
         SubConversation: {
             request_specialist_sub_conversation,
             end_specialist_sub_conversation
-        }
+        },
+        // Adicionar a nova ferramenta
+        SemanticMemoryTool
     },
 
     // Componentes de Embedding (novo)

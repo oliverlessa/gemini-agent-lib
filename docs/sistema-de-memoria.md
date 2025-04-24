@@ -84,6 +84,23 @@ Métodos principais:
 - `delete(ids)`: Remove documentos da memória pelos seus IDs.
 - `close()`: Fecha a conexão com o backend.
 
+### Modos de Uso da SemanticMemory
+
+Existem duas maneiras principais de interagir com a `SemanticMemory`:
+
+1.  **RAG Automático Integrado (via `ChatAgent`):**
+    *   **Como funciona:** Ao configurar o `ChatAgent` e fornecer uma instância de `SemanticMemory` no construtor, o agente pode realizar RAG automaticamente. Antes de gerar uma resposta, ele consulta a `SemanticMemory` com base na mensagem atual do usuário e injeta os resultados relevantes no contexto do LLM.
+    *   **Configuração:** Passar a instância de `SemanticMemory` e parâmetros opcionais como `ragTopK`, `ragContextPrefix`, etc., no construtor do `ChatAgent`.
+    *   **Caso de uso:** Ideal para cenários onde se deseja que o agente sempre tente enriquecer suas respostas com informações da base de conhecimento de forma transparente.
+
+2.  **Ferramenta Explícita (`SemanticMemoryTool`):**
+    *   **Como funciona:** A `SemanticMemoryTool` encapsula a funcionalidade de busca da `SemanticMemory` em um formato de ferramenta padrão. Qualquer agente (incluindo `Agent` base ou `ChatAgent`) pode ser configurado com esta ferramenta. O LLM decidirá *quando* chamar a ferramenta (`semantic_memory_search`) com base nas instruções do agente e na conversa.
+    *   **Configuração:** Instanciar a `SemanticMemoryTool` passando uma instância de `SemanticMemory` e adicionar a ferramenta à lista `tools` do agente.
+    *   **Caso de uso:** Oferece controle mais granular sobre quando a busca semântica é realizada. Útil para agentes que precisam decidir explicitamente se devem ou não consultar a base de conhecimento, ou para usar a busca semântica com agentes que não são `ChatAgent`.
+    *   **Veja mais detalhes:** [Documentação da SemanticMemoryTool](./semantic-memory-tool.md) (será criada)
+
+Ambas as abordagens utilizam a mesma instância subjacente de `SemanticMemory` e seus adaptadores (como `ChromaDBMemoryAdapter`).
+
 ## Adaptadores Disponíveis
 
 ### SQLite (Conversation, Fact, Summary)
